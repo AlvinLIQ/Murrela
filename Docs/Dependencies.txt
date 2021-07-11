@@ -1,0 +1,11 @@
+Libs|
+Win32
+dwrite.lib
+d3d11.lib
+d2d1.lib
+dcomp.lib
+
+UWP
+dwrite.lib
+d3d11.lib
+d2d1.lib

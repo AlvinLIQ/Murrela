@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Headers/Murrela.h"
 
 using namespace Microsoft::WRL;

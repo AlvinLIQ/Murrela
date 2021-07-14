@@ -8,6 +8,9 @@ using namespace Controls;
 
 D2D1_POINT_2F curPos = {};
 short param;
+CoreApp* coreApp = nullptr;
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 /* run murrela ui
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int ParamNum)
@@ -18,14 +21,32 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	return 0;
 }
 */
-
-void CoreApp::Run()
+CoreApp::CoreApp(HINSTANCE hInstance)
 {
-	ShowWindow(coreWindow, ParamNum);
-	SetLayeredWindowAttributes(coreWindow, RGB(0, 0, 0), 0xD0, LWA_ALPHA);
+	WNDCLASS wc = {};
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.lpfnWndProc = WindowProc;
+	wc.hInstance = hInstance;
+	wc.lpszClassName = L"Sample";
+
+	RegisterClass(&wc);
+
+	coreWindow = CreateWindowEx(WS_EX_LAYERED, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		NULL, NULL, hInstance, NULL);
 
 	RECT scSize;
 	GetClientRect(coreWindow, &scSize);
+	murrela = new Murrela(coreWindow, D2D1::SizeF((FLOAT)(scSize.right - scSize.left), (FLOAT)(scSize.bottom - scSize.top)));
+
+	coreApp = this;
+}
+
+void CoreApp::Run()
+{
+	ShowWindow(coreWindow, SW_SHOWDEFAULT);
+	SetLayeredWindowAttributes(coreWindow, RGB(0, 0, 0), 0xD0, LWA_ALPHA);
+
 	//	content must be assigned a value
 	//  content = (Control*)new Just_Editor::MainGrid(murrela);
 
@@ -39,7 +60,7 @@ void CoreApp::Run()
 	}
 }
 
-LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -57,30 +78,30 @@ LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	case WM_MOUSEMOVE:
 	{
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
-		_PointerRequest(&curPos, 1, content);
+		_PointerRequest(&curPos, 1, coreApp->content);
 		Controls::_ReDrawRequest();
 	}
 	break;
 	/*
 	case WM_NCMOUSEMOVE:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
-		_PointerRequest(&curPos, 1, content);
+		_PointerRequest(&curPos, 1, coreApp->content);
 		Controls::_ReDrawRequest();
 		break;
 		*/
 	case WM_LBUTTONUP:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
-		content->PointerReleased(&curPos, 4);
+		coreApp->content->PointerReleased(&curPos, 4);
 		Controls::_ReDrawRequest();
 		break;
 	case WM_LBUTTONDOWN:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
-		content->PointerPressed(&curPos, 4);
+		coreApp->content->PointerPressed(&curPos, 4);
 		Controls::_ReDrawRequest();
 		break;
 	case WM_SIZE:
 	case WM_SIZING:
-		UpdateSize();
+		coreApp->UpdateSize();
 		Controls::_ReDrawRequest();
 		break;
 	}

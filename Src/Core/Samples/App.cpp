@@ -1,4 +1,4 @@
-#include "Murrela/Headers/CoreApp.h"
+#include "../Murrela/Headers/CoreApp.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int ParamNum)
 {

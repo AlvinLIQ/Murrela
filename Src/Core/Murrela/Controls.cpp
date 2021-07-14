@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Headers/Controls.h"
 
 using namespace Controls;

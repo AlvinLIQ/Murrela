@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Headers/Controls.h"
 
 using namespace Controls;
@@ -27,14 +28,15 @@ Control::Control(Murrela* murla, Alignments alignment, D2D1_SIZE_F controlRect)
 
 void Control::Focus()
 {
-	if (focusedControl != nullptr)
+	if (focusedControl != nullptr && focusedControl != this)
 		focusedControl->CancelFocus();
 	focusedControl = this;
 }
 
 void Control::CancelFocus()
 {
-	focusedControl = nullptr;
+	if (focusedControl == this)
+		focusedControl = nullptr;
 }
 
 void Control::ReDraw()

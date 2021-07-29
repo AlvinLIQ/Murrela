@@ -31,7 +31,7 @@ CoreApp::CoreApp(HINSTANCE hInstance)
 
 	RegisterClass(&wc);
 
-	coreWindow = CreateWindowEx(WS_EX_LAYERED, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW,
+	coreWindow = CreateWindowEx(WS_EX_APPWINDOW, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 		NULL, NULL, hInstance, NULL);
 
@@ -45,14 +45,16 @@ CoreApp::CoreApp(HINSTANCE hInstance)
 void CoreApp::Run()
 {
 	ShowWindow(coreWindow, SW_SHOWDEFAULT);
-	SetLayeredWindowAttributes(coreWindow, RGB(0, 0, 0), 0xD0, LWA_ALPHA);
+//	SetLayeredWindowAttributes(coreWindow, RGB(0, 0, 0), 0xD0, LWA_COLORKEY);
 
 	//	content must be assigned a value
 	//  content = (Control*)new Just_Editor::MainGrid(murrela);
 
 
 	MSG msg = {};
+	
 	Controls::_StartReDrawLoop(&content);
+
 	while (GetMessage(&msg, coreWindow, 0, 0))
 	{
 		TranslateMessage(&msg);

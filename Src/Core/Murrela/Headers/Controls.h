@@ -42,7 +42,7 @@ namespace Controls
 		bool AutoWidth;
 		bool AutoHeight;
 		// 0 keep focus until another one focused 1 cancel focus when pointer released
-		short FocuesType = 1;
+		short FocusType = 1;
 
 		virtual void KeyReceived(unsigned int keyCode, bool isReleased)
 		{
@@ -99,7 +99,7 @@ namespace Controls
 		virtual void PointerReleased(D2D1_POINT_2F* pPosition, short pState)
 		{
 			pointerState = IsInside(pPosition) ? 1 : 0;
-			if (FocuesType & 1)
+			if (FocusType & 1)
 				CancelFocus();
 		}
 		virtual void PointerMoved(D2D1_POINT_2F* pPosition, short pState)
@@ -312,7 +312,7 @@ namespace Controls
 	private:
 		std::wstring text;
 		ID2D1SolidColorBrush* brush;
-		IDWriteTextLayout* textLayout;
+		IDWriteTextLayout* textLayout = nullptr;
 
 		D2D1_POINT_2F offsets;
 
@@ -369,7 +369,7 @@ namespace Controls
 			murrela->d2dContext->CreateSolidColorBrush(D2D1::ColorF(0xF0F0F0, 0.5), &brushes[2]);
 			murrela->d2dContext->CreateSolidColorBrush(D2D1::ColorF(0x222222, 0.5), &brushes[3]);
 
-			FocuesType = 1;
+			FocusType = 0;
 		}
 		~TextBox()
 		{
@@ -1320,18 +1320,9 @@ namespace Controls
 
 	namespace XML
 	{
-		const wchar_t ControlsName[][11] = {L"Grid", L"StackPanel", L"Button", L"TextBlock", L"TextBox"};
-		static void XMLToControls(const wchar_t* xmlStr, long xmlLen, Murrela* murrela, Control** result)
-		{
-			std::wstring XmlStr = xmlStr;
-			std::wstring xmlProperty;
-			size_t offset;
-			Alignments alignment;
-			for (long i = 0; i < xmlLen; i++)
-			{
-				alignment = DefaultAlignment;
-				offset = XmlStr.find(L"<");
-			}
-		}
+		const wchar_t ControlsName[] = L"Grid\0StackPanel\0Button\0RepeatButton\0Image\0TextBlock\0TextBox";
+		const unsigned char ControlIndex[] = {0, 5, 16, 23, 36, 42, 52};
+//		static void XMLToControls(const wchar_t* xmlStr, long xmlLen, Murrela* murrela, Control** result);
+//		static void XMLToCode(const wchar_t* xmlStr, long xmlLen, CoreApp* murrela, std::wstring* result);
 	}
 }

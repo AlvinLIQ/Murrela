@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Headers/Controls.h"
 
 using namespace Controls;
@@ -45,7 +44,7 @@ void Control::ReDraw()
 	ID2D1Layer* tLayer = nullptr;
 	if (this->Parent == nullptr)
 #ifndef _UWP
-		murrela->d2dContext->Clear(D2D1::ColorF(D2D1::ColorF::Black));
+		murrela->d2dContext->Clear(D2D1::ColorF(D2D1::ColorF::White));
 #else
 		murrela->d2dContext->Clear(WhiteColor);
 #endif

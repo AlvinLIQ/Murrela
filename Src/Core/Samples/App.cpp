@@ -15,16 +15,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	mGrid->AppendItem((Control*)(addTabBtn = new Button(L"Add Tab", coreApp->murrela, Center, {100, 40})));
 
 	TabContainer* tabContainer;
-	mGrid->AppendItem((Control*)(tabContainer = new TabContainer(coreApp->murrela, Left | Bottom, {0, 40})));
+	mGrid->AppendItem((Control*)(tabContainer = new TabContainer(coreApp->murrela, Left | Bottom, {0, 30})));
 	addTabBtn->ClickEvent.param = (void*)tabContainer;
 	addTabBtn->Clicked.push_back([](void* param)
 	{
 			Tab* tabCon = (Tab*)param;
 			tabCon->AppendItem(new Tab(L"Tab", tabCon->GetMurrela(), Left | Stretch));
 	});
-
-
-
+//	tabContainer->AppendItem(new Tab(L"Tab", tabContainer->GetMurrela(), Left | Stretch));
 	coreApp->Run();
 	coreApp->~CoreApp();
 	return 0;

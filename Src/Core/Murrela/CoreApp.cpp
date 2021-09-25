@@ -73,6 +73,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 		Controls::_KeyReceived((unsigned int)wParam, false);
 		break;
+
+	case WM_IME_CHAR:
 	case WM_CHAR:
 		Controls::_CharacterReceived((unsigned int)wParam);
 		Controls::_ReDrawRequest();

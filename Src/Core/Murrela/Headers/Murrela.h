@@ -2,6 +2,7 @@
 
 #include <d2d1_3.h>
 #include <d3d11_4.h>
+#include <d2d1effects.h>
 #include <dwrite.h>
 #include <dcomp.h>
 #include <wincodec.h>
@@ -127,6 +128,15 @@ public:
 		ID2D1Effect* effect1;
 		d2dContext->CreateEffect(CLSID_D2D1Shadow, &effect1);
 		d2dContext->DrawImage(effect1);
+	}
+
+#ifdef _UWP
+	IUnknown* GetWindow()
+#else
+	HWND GetWindow()
+#endif
+	{
+		return coreWindow;
 	}
 
 private:

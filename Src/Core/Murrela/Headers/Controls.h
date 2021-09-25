@@ -104,7 +104,7 @@ namespace Controls
 		}
 		virtual void PointerMoved(D2D1_POINT_2F* pPosition, short pState)
 		{
-			if (pointerState != 1 && pointerState != 2)
+			if (pointerState != 1 && pointerState != 2 && IsInside(pPosition))
 				PointerEntered(pPosition, pState);
 
 			size_t count = PointerMovedEvents.size();
@@ -307,6 +307,7 @@ namespace Controls
 		void Draw()
 		{
 			murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + offsets.x, ControlOffset.y + offsets.y), textLayout, brush);
+//			murrela->DrawShadow(GetRectForRender(), { 10.0f, 10.0f });
 		}
 
 	private:
@@ -391,7 +392,7 @@ namespace Controls
 					MoveTo(cursor - 1);
 					if (selectionMetrics.size())
 					{
-						auto tMetrics = selectionMetrics.back();
+						const auto& tMetrics = selectionMetrics.back();
 						if (cursor < tMetrics.textPosition)
 							Select(tMetrics.textPosition + tMetrics.length);
 						else
@@ -415,7 +416,7 @@ namespace Controls
 					MoveTo(cursor + 1);
 					if (selectionMetrics.size())
 					{
-						auto tMetrics = selectionMetrics.front();
+						const auto& tMetrics = selectionMetrics.front();
 						if (cursor > tMetrics.textPosition + tMetrics.length)
 							Select(tMetrics.textPosition);
 						else
@@ -426,7 +427,7 @@ namespace Controls
 				}
 				else if (!isShiftHeld && selectionMetrics.size())
 				{
-					auto tMetrics = selectionMetrics.back();
+					const auto& tMetrics = selectionMetrics.back();
 					UINT32 pos = tMetrics.textPosition + tMetrics.length;
 					MoveTo(pos > cursor ? pos : cursor);
 					CancelSelection();
@@ -437,7 +438,7 @@ namespace Controls
 			case VK_DELETE:
 				if (!ClearSelection() && cursor < length)
 				{
-					text = text.substr(0, cursor) + text.substr(cursor + 1, --length - cursor);
+					text = text.substr(0, cursor) + text.substr((size_t)cursor + 1, --length - cursor);
 					UpdateText();
 					break;
 				}

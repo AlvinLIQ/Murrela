@@ -9,6 +9,7 @@ using namespace Controls;
 D2D1_POINT_2F curPos = {};
 short param;
 CoreApp* coreApp = nullptr;
+TRACKMOUSEEVENT tme;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -44,6 +45,11 @@ CoreApp::CoreApp(HINSTANCE hInstance)
 
 void CoreApp::Run()
 {
+	tme.cbSize = sizeof(tme);
+	tme.dwFlags = TME_LEAVE;
+	tme.dwHoverTime = HOVER_DEFAULT;
+	tme.hwndTrack = coreWindow;
+	
 	ShowWindow(coreWindow, SW_SHOWDEFAULT);
 //	SetLayeredWindowAttributes(coreWindow, RGB(0, 0, 0), 0xD0, LWA_COLORKEY);
 
@@ -80,11 +86,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		Controls::_ReDrawRequest();
 		break;
 	case WM_MOUSEMOVE:
-	{
+		TrackMouseEvent(&tme);
+	case WM_MOUSELEAVE:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
 		_PointerRequest(&curPos, 1, coreApp->content);
 		Controls::_ReDrawRequest();
-	}
 	break;
 	/*
 	case WM_NCMOUSEMOVE:

@@ -41,7 +41,6 @@ void Control::CancelFocus()
 void Control::ReDraw()
 {
 	murrela->d2dContext->BeginDraw();
-	ID2D1Layer* tLayer = nullptr;
 	if (this->Parent == nullptr)
 #ifndef _UWP
 		murrela->d2dContext->Clear(D2D1::ColorF(D2D1::ColorF::White));
@@ -122,12 +121,11 @@ void ItemsContainer::PointerMoved(D2D1_POINT_2F* pPosition, short pState)
 				break;
 			}
 		}
-		if (pointerIndex < size && items[pointerIndex]->GetPointerState() != 2 && pointerIndex != i)
+		if (pointerIndex < size && items[pointerIndex]->GetPointerState() ^ 3 && pointerIndex != i)
 			items[pointerIndex]->PointerExited(pPosition, pState);
 		pointerIndex = i;
 	}
 	Control::PointerMoved(pPosition, pState);
-	lastPos = *pPosition;
 }
 
 void ItemsContainer::PointerReleased(D2D1_POINT_2F* pPosition, short pState)

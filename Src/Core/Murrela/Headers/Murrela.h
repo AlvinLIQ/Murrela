@@ -117,7 +117,7 @@ public:
 		wicFactory->CreateFormatConverter(&bitmapConverter);
 		bitmapConverter->Initialize(bitmapFrame, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.f, WICBitmapPaletteTypeMedianCut);
 
-		auto hr = d2dContext->CreateBitmapFromWicBitmap(bitmapConverter, NULL, bitmap);
+		d2dContext->CreateBitmapFromWicBitmap(bitmapConverter, NULL, bitmap);
 		SafeRelease((IUnknown**)&bitmapConverter);
 	}
 	D2D1_SIZE_F d2dSize;

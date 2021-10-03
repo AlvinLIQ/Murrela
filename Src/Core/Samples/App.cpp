@@ -19,7 +19,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	addTabBtn->ClickEvent.param = (void*)tabContainer;
 	addTabBtn->Clicked.push_back([](void* param)
 	{
-			Tab* tabCon = (Tab*)param;
+			TabContainer* tabCon = (TabContainer*)param;
 			tabCon->AppendItem(new Tab(L"Tab", tabCon->GetMurrela(), Left | Stretch));
 	});
 //	tabContainer->AppendItem(new Tab(L"Tab", tabContainer->GetMurrela(), Left | Stretch));

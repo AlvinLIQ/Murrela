@@ -684,7 +684,7 @@ namespace Controls
 			return D2D1::Point2F(ControlOffset.x + 2, ControlOffset.y + 5);
 		}
 
-		unsigned int cursor = 0, length = 0, selLen = 0;
+		unsigned int cursor = 0, length = 0;
 		float cursorX = 0.0f, cursorY = 0.0f, textHeight = 0.0f;
 		short brushIndex = 0;
 	protected:
@@ -807,7 +807,6 @@ namespace Controls
 			else if (index < items.size())
 				items.insert(items.begin() + index, newItem);
 			newItem->SetParent(this);
-			PointerMoved(&lastPos, 0);
 		}
 		virtual void RemoveItem(Control* target)
 		{
@@ -1257,6 +1256,12 @@ namespace Controls
 				ClsBtn->Clicked[0](ClsBtn->ClickEvent.param);
 			else
 				ItemsContainer::PointerPressed(pPosition, pState);
+		}
+
+		void PointerEntered(D2D1_POINT_2F* pPosition, short pState)
+		{
+			if (IsInside(pPosition))
+				pointerState = 1;
 		}
 
 		bool IsSelected();

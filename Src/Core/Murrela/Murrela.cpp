@@ -133,16 +133,15 @@ void Murrela::SetSize(D2D1_SIZE_F newSize)
         swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
 //        swapChainDesc.Scaling = DXGI_SCALING_NONE;
         
-//        dxgiFactory->CreateSwapChainForHwnd(dxgiDevice.Get(), coreWindow, &swapChainDesc, nullptr, nullptr, &dxgiSwapChain);
-
+//        dxgiFactory->CreateSwapChainForHwnd(dxgiDevice.Get(), coreWindow, &swapChainDesc, nullptr, nullptr, dxgiSwapChain.GetAddressOf());
         dxgiFactory->CreateSwapChainForComposition(dxgiDevice.Get(), &swapChainDesc, NULL, &dxgiSwapChain);
+        
         dCompDevice->CreateTargetForHwnd(coreWindow, TRUE, dCompTarget.GetAddressOf());
         IDCompositionVisual* rVisual;
         dCompDevice->CreateVisual(&rVisual);
         rVisual->SetContent(dxgiSwapChain.Get());
         dCompTarget->SetRoot(rVisual);
         dCompDevice->Commit();
-        
 #endif
     }
     else

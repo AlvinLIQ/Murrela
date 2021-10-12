@@ -10,6 +10,8 @@ void* tickParam;
 bool tickAbort = false;
 //0 close 1 redraw 2 waiting 
 short drawSignal = 1;
+short* pDrawSignal = &drawSignal;
+HANDLE drawThread = NULL;
 
 
 Control::Control(Murrela* murla, Alignments alignment, D2D1_SIZE_F controlRect)
@@ -80,31 +82,38 @@ void Controls::_KeyReceived(unsigned int keycode, bool isReleased)
 		focusedControl->KeyReceived(keycode, isReleased);
 }
 
-void Controls::_ReDrawLoop(Control** content)
+DWORD Controls::_ReDrawLoop(_In_ LPVOID content)
 {
-	while (drawSignal)
+	while (*pDrawSignal)
 	{
-		if (drawSignal & 1)
+		if (*pDrawSignal == 1)
 		{
-			(*content)->ReDraw();
-			drawSignal = 2;
+			(*(Controls::Control**)content)->ReDraw();
+			_Drew();
 		}
 	}
+	return 0;
 }
 
 void Controls::_StartReDrawLoop(Control** content)
 {
-	HANDLE thHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)_ReDrawLoop, (LPVOID)content, 0, 0);
+	drawThread = CreateThread(NULL, 0, Controls::_ReDrawLoop, (LPVOID)content, 0, 0);
 }
 
 void Controls::_StopReDrawLoop()
 {
-	drawSignal = 0;
+	*pDrawSignal = 0;
+	CloseHandle(drawThread);
 }
 
 void Controls::_ReDrawRequest()
 {
-	drawSignal = 1;
+	*pDrawSignal = 1;
+}
+
+void Controls::_Drew()
+{
+	*pDrawSignal = 2;
 }
 
 void ItemsContainer::PointerMoved(D2D1_POINT_2F* pPosition, short pState)

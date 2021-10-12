@@ -74,8 +74,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		exit(0);
-
+		Controls::_StopReDrawLoop();
+		exit(1);
+		return 0;
 	case WM_KEYDOWN:
 		Controls::_KeyReceived((unsigned int)wParam, false);
 		break;

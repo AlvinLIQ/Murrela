@@ -1320,9 +1320,10 @@ namespace Controls
 	void _CharacterReceived(unsigned int keycode);
 	void _KeyReceived(unsigned int keycode, bool isReleased);
 
-	void _ReDrawLoop(Control** content);
+	DWORD _ReDrawLoop(_In_ LPVOID content);
 	void _StartReDrawLoop(Control** content);
 	void _StopReDrawLoop();
+	void _Drew();
 
 	namespace XML
 	{

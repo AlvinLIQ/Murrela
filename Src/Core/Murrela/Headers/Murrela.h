@@ -3,6 +3,7 @@
 #include <d2d1_3.h>
 #include <d3d11_4.h>
 #include <d2d1effects.h>
+#include <DirectXMath.h>
 #include <dwrite.h>
 #include <dcomp.h>
 #include <wincodec.h>
@@ -50,6 +51,7 @@ public:
 	Microsoft::WRL::ComPtr<ID2D1DeviceContext> d2dContext;
 	Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext;
+//	Microsoft::WRL::ComPtr<ID3D11Asynchronous> d3dAsynchronous;
 	Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
 	Microsoft::WRL::ComPtr<IDXGIFactory2> dxgiFactory;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;

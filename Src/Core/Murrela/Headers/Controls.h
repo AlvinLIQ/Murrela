@@ -44,6 +44,12 @@ namespace Controls
 		// 0 keep focus until another one focused 1 cancel focus when pointer released
 		short FocusType = 1;
 
+		typedef struct
+		{
+			void* events;
+			void* param;
+		} NormalEvent;
+
 		virtual void KeyReceived(unsigned int keyCode, bool isReleased)
 		{
 
@@ -107,9 +113,8 @@ namespace Controls
 			if (pointerState != 1 && pointerState != 2 && IsInside(pPosition))
 				PointerEntered(pPosition, pState);
 
-			size_t count = PointerMovedEvents.size();
-			for (size_t i = 0; i < count; i++)
-				PointerMovedEvents[i](pPosition, pState);
+			for (auto i = PointerMovedEvents.begin(); i < PointerMovedEvents.end(); i++)
+				(*i)(pPosition, pState);
 		}
 		std::vector<void(*)(D2D1_POINT_2F * pPosition, short pState)> PointerMovedEvents;
 
@@ -234,6 +239,15 @@ namespace Controls
 			return pos;
 		}
 
+		void CallEvent(NormalEvent* tEvent)
+		{
+			auto events = (std::vector<void(*)(void* param)>*)tEvent->events;
+			for (auto i = events->begin(); i != events->end(); i++)
+			{
+				(*i)(tEvent->param);
+			}
+		}
+
 		Murrela* murrela;
 		Control* maxWidthChild = nullptr;
 		Control* maxHeightChild = nullptr;
@@ -318,7 +332,7 @@ namespace Controls
 		D2D1_POINT_2F offsets;
 
 	protected:
-		void Init()
+		virtual void Init()
 		{
 			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 1.0f, 1.0f , 1.0f }, &brush);
 		}
@@ -894,7 +908,8 @@ namespace Controls
 		{
 
 		}
-		void AppendItem(Control* newItem, int colNum = 0, int rowNum = 0)
+
+		virtual void AppendItem(Control* newItem, int colNum = 0, int rowNum = 0)
 		{
 			size_t itemIndex = items.size();
 			ItemsContainer::AppendItem(newItem);
@@ -987,7 +1002,7 @@ namespace Controls
 		//False Horizontal True Vertical
 		bool Orientation;
 
-		void AppendItem(Control* newItem, size_t index = -1)
+		virtual void AppendItem(Control* newItem, size_t index = -1) override
 		{
 			ItemsContainer::AppendItem(newItem, index);
 			this->UpdateLayout();
@@ -1043,11 +1058,6 @@ namespace Controls
 		}
 	};
 
-	typedef struct
-	{
-		void* events;
-		void* param;
-	} NormalEvent;
 
 	class Button : public ChildContainer
 	{
@@ -1083,9 +1093,7 @@ namespace Controls
 			{
 				if (Control::IsInside(pPosition))
 				{
-					size_t count = Clicked.size();
-					for (size_t i = 0; i < count; i++)
-						Clicked[i](ClickEvent.param);
+					CallEvent(&ClickEvent);
 				}
 				ChildContainer::PointerReleased(pPosition, pState);
 			}
@@ -1294,7 +1302,7 @@ namespace Controls
 			}
 		}
 
-		void AppendItem(Tab* newTab, size_t index = -1)
+		virtual void AppendItem(Tab* newTab, size_t index = -1)
 		{
 			newTab->ClsBtn->ClickEvent.param = newTab;
 			newTab->ClsBtn->Clicked.push_back((void(*)(void* param))&TabContainer::CloseTab);
@@ -1324,12 +1332,12 @@ namespace Controls
 	void _StartReDrawLoop(Control** content);
 	void _StopReDrawLoop();
 	void _Drew();
-
+	/*
 	namespace XML
 	{
 		const wchar_t ControlsName[] = L"Grid\0StackPanel\0Button\0RepeatButton\0Image\0TextBlock\0TextBox";
 		const unsigned char ControlIndex[] = {0, 5, 16, 23, 36, 42, 52};
 //		static void XMLToControls(const wchar_t* xmlStr, long xmlLen, Murrela* murrela, Control** result);
 //		static void XMLToCode(const wchar_t* xmlStr, long xmlLen, CoreApp* murrela, std::wstring* result);
-	}
+	}*/
 }

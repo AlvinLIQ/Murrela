@@ -1,6 +1,7 @@
 #include "Headers/Murrela.h"
 
 using namespace Microsoft::WRL;
+using namespace DirectX;
 
 #ifdef _UWP
 Murrela::Murrela(IUnknown* corewindow, D2D1_SIZE_F size)
@@ -88,12 +89,53 @@ void Murrela::SetTargetBitmap()
 #else
     dpi = 96.0f;
 #endif
-    
+    /*
+    ID3D11Buffer* g_pVertexBuffer;
+
+    // Define the data-type that
+    // describes a vertex.
+    struct SimpleVertexCombined
+    {
+        XMFLOAT3 Pos;
+        XMFLOAT3 Col;
+    };
+
+    // Supply the actual vertex data.
+    SimpleVertexCombined verticesCombo[] =
+    {
+        XMFLOAT3(0.0f, 0.5f, 0.5f),
+        XMFLOAT3(0.0f, 0.0f, 0.5f),
+        XMFLOAT3(0.5f, -0.5f, 0.5f),
+        XMFLOAT3(0.5f, 0.0f, 0.0f),
+        XMFLOAT3(-0.5f, -0.5f, 0.5f),
+        XMFLOAT3(0.0f, 0.5f, 0.0f),
+    };
+
+    // Fill in a buffer description.
+    D3D11_BUFFER_DESC bufferDesc;
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.ByteWidth = sizeof(SimpleVertexCombined) * 3;
+    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = 0;
+
+    // Fill in the subresource data.
+    D3D11_SUBRESOURCE_DATA InitData;
+    InitData.pSysMem = verticesCombo;
+    InitData.SysMemPitch = 0;
+    InitData.SysMemSlicePitch = 0;
+
+    // Create the vertex buffer.
+    d3dDevice->CreateBuffer(&bufferDesc, &InitData, &g_pVertexBuffer);
+
+    UINT stride = sizeof(XMFLOAT3) * 6;
+    UINT offset = 0;
+    d3dContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+    */
     D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
         pixelFormat, dpi, dpi);
 
     ComPtr<ID2D1Bitmap1> d2dBitmap;
-    
     d2dContext->SetDpi(dpi, dpi);
     d2dContext->CreateBitmapFromDxgiSurface(dxgiSurface.Get(), &bitmapProperties, &d2dBitmap);
     d2dContext->SetTarget(d2dBitmap.Get());
@@ -134,7 +176,7 @@ void Murrela::SetSize(D2D1_SIZE_F newSize)
 //        swapChainDesc.Scaling = DXGI_SCALING_NONE;
         
 //        dxgiFactory->CreateSwapChainForHwnd(dxgiDevice.Get(), coreWindow, &swapChainDesc, nullptr, nullptr, dxgiSwapChain.GetAddressOf());
-        dxgiFactory->CreateSwapChainForComposition(dxgiDevice.Get(), &swapChainDesc, NULL, &dxgiSwapChain);
+        dxgiFactory->CreateSwapChainForComposition(d3dDevice.Get(), &swapChainDesc, NULL, &dxgiSwapChain);
         
         dCompDevice->CreateTargetForHwnd(coreWindow, TRUE, dCompTarget.GetAddressOf());
         IDCompositionVisual* rVisual;

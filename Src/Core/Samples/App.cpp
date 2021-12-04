@@ -1,3 +1,4 @@
+/*
 #include "../Murrela/Headers/CoreApp.h"
 
 using namespace Controls;
@@ -27,3 +28,4 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	coreApp->~CoreApp();
 	return 0;
 }
+*/

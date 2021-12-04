@@ -119,8 +119,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	UpdateWindow(hwnd);
 //	SetLayeredWindowAttributes(coreWindow, 0x00FFFFFF, 0x80, LWA_COLORKEY);
 
-
-End:
+//End:
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 

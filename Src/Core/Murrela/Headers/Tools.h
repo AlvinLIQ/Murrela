@@ -3,7 +3,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-#include <libssh2.h>
+//#include <libssh2.h>
 
 #pragma comment(lib,"ws2_32.lib")
 
@@ -16,16 +16,21 @@ const wchar_t* GetAppFolderPath()
 #endif
 }
 
-void ReadFileFromAppFolderW(std::wstring PathToFile, void** result)
+void ReadFileFromPath(std::wstring PathToFile, void** result)
 {
 	FILE* fp;
-	_wfopen_s(&fp, (GetAppFolderPath() + PathToFile).c_str(), L"r");
+	_wfopen_s(&fp, (PathToFile).c_str(), L"r");
 	fseek(fp, SEEK_END, 0);
 	long fileSize = ftell(fp);
 	fseek(fp, SEEK_SET, 0);
 	*result = new wchar_t[fileSize];
 	fgetws((wchar_t*)*result, fileSize, fp);
 	fclose(fp);
+}
+
+void ReadFileFromAppFolderW(std::wstring PathToFile, void** result)
+{
+	ReadFileFromPath(GetAppFolderPath() + PathToFile, result);
 }
 
 #define httpRequest struct http_req
@@ -137,7 +142,7 @@ wchar_t* ctowc(const char* source)
 	result[rLen] = '\0';
 	return result;
 }
-
+/*
 void SSHConnect(const wchar_t* ip, LONG port, const wchar_t* username, const wchar_t* passwd)
 {
 	LIBSSH2_SESSION* session;
@@ -157,3 +162,4 @@ void SSHConnect(const wchar_t* ip, LONG port, const wchar_t* username, const wch
 Error:
 
 }
+*/

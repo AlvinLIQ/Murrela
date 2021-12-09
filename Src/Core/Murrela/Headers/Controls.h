@@ -1252,19 +1252,12 @@ namespace Controls
 //			((Control*)TabTitle)->UpdateLayout();
 //			((Control*)ClsBtn)->UpdateLayout();
 			if (brushes[pointerState] != nullptr)
-				murrela->d2dContext->FillRectangle(GetRectForRender(), brushes[pointerState]);
+				murrela->d2dContext->FillRectangle(GetRectForRender(), brushes[IsSelected() ? 2 : pointerState]);
 		//	murrela->DrawShadow(GetRectForRender());
 			ItemsContainer::Draw();
 		}
 
-		void PointerPressed(D2D1_POINT_2F* pPosition, short pState)
-		{
-			//	SetText(L"Pressed");
-			if (pState & 2)
-				ClsBtn->Clicked[0](ClsBtn->ClickEvent.param);
-			else
-				ItemsContainer::PointerPressed(pPosition, pState);
-		}
+		void PointerPressed(D2D1_POINT_2F* pPosition, short pState);
 
 		void PointerEntered(D2D1_POINT_2F* pPosition, short pState)
 		{

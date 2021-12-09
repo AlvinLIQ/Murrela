@@ -145,6 +145,21 @@ void ItemsContainer::PointerReleased(D2D1_POINT_2F* pPosition, short pState)
 	Control::PointerReleased(pPosition, pState);
 }
 
+void Tab::PointerPressed(D2D1_POINT_2F* pPosition, short pState)
+{
+	//	SetText(L"Pressed");
+
+	if (ClsBtn->IsInside(pPosition))
+	{
+		ItemsContainer::PointerPressed(pPosition, pState);
+	}
+	else
+	{
+		((TabContainer*)this->Parent)->Select(this);
+		Control::PointerPressed(pPosition, pState);
+	}
+}
+
 bool Tab::IsSelected()
 {
 	return ((TabContainer*)this->Parent)->SelectedTab == this;

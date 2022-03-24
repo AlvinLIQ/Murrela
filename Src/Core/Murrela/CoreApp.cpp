@@ -110,6 +110,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		coreApp->content->PointerPressed(&curPos, 4);
 		Controls::_ReDrawRequest();
 		break;
+	case WM_MDIMAXIMIZE:
 	case WM_SIZE:
 	case WM_SIZING:
 		coreApp->UpdateSize();

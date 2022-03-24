@@ -39,8 +39,6 @@ namespace Controls
 		Alignments Alignment;
 
 		bool IsVisible = true;
-		bool AutoWidth;
-		bool AutoHeight;
 		// 0 keep focus until another one focused 1 cancel focus when pointer released
 		short FocusType = 1;
 
@@ -135,9 +133,9 @@ namespace Controls
 			{
 				if (HAS_PARENT)
 				{
-					if (!AutoWidth && Parent->maxWidth < maxWidth)
+					if (Parent->maxWidth < maxWidth)
 						maxSize.width = Parent->maxWidth;
-					if (!AutoHeight && Parent->maxHeight < maxHeight)
+					if (Parent->maxHeight < maxHeight)
 						maxSize.height = Parent->maxHeight;
 				}
 			}
@@ -1052,12 +1050,11 @@ namespace Controls
 						case Bottom:
 							((float*)&items[i]->ControlOffset)[invO] = cOffset[invO] + cSize[invO] - ((float*)&items[i]->ControlSize)[invO];
 							break;
-					}
+						}
 				}
 			}
 		}
 	};
-
 
 	class Button : public ChildContainer
 	{
@@ -1141,15 +1138,16 @@ namespace Controls
 			orientation = _orientation;
 			SetContent(new Button(L"=", murla, Stretch));
 			cOffset = (float*)&child->ControlOffset, cSize = (float*)&child->ControlSize, mOffset = (float*)&ControlOffset, mSize = (float*)&ControlSize;
-			MaxValue = 1.0f - Step / mSize[(int)orientation];
 		}
 		void Draw()
 		{
-			int o = (int)orientation, invO = (int)orientation ^ 1;
+			int o = (int)orientation, invO = (int)!orientation;
 			cOffset[invO] = mOffset[invO];
 			cSize[invO] = mSize[invO];
 			cSize[o] = Step;
 			cOffset[o] = Value * mSize[o] + mOffset[o];
+			if (cOffset[o] + cSize[o] > mOffset[o] + mSize[o])
+				cOffset[o] = mOffset[o] + mSize[o] - cSize[o];
 			child->Draw();
 		}
 
@@ -1203,20 +1201,41 @@ namespace Controls
 	public:
 		ScrollBar(Murrela* murla, Alignments alignment, D2D1_SIZE_F controlSize = {}, bool _orientation = true) :StackPanel(murla, alignment, controlSize, _orientation)
 		{
-			AppendItem(decreaseBtn = new RepeatButton(L"▲", murla, Stretch));
-			AppendItem(mSlider = new Slider(murla, Top | Stretch, { decreaseBtn->ControlSize.width, 100}));
-			AppendItem(increaseBtn = new RepeatButton(L"▼", murla, Stretch));
+			AppendItem(decreaseBtn = new RepeatButton(L"", murla, Stretch));
+			AppendItem(mSlider = new Slider(murla, Stretch, {}, _orientation));
+			AppendItem(increaseBtn = new RepeatButton(L"", murla, Stretch));
+
+			SetOrientation(_orientation);
+
 			decreaseBtn->ClickEvent.param = mSlider;
 			increaseBtn->ClickEvent.param = mSlider;
 			decreaseBtn->Clicked.push_back((void (*)(void* param)) & dBtn_Clicked);
 			increaseBtn->Clicked.push_back((void (*)(void* param)) & iBtn_Clicked);
 		}
 
-		void SizeChanged(D2D1_SIZE_F newSize)
+		void SetOrientation(bool _orientation)
 		{
-			if (items.size() == 3)
-				items[1]->ControlSize.height = newSize.height - items[0]->ControlSize.height * 2;
-			StackPanel::SizeChanged(newSize);
+			if (_orientation)
+			{
+				decreaseBtn->SetText(L"⏶");
+				increaseBtn->SetText(L"⏷");
+			}
+			else
+			{
+				decreaseBtn->SetText(L"⏴");
+				increaseBtn->SetText(L"⏵");
+			}
+			Orientation = _orientation;
+		}
+
+		void UpdateLayout()
+		{
+			if (HAS_PARENT && items.size() == 3)
+			{
+				int invO = (int)Orientation;
+				((float*)&items[1]->ControlSize)[invO] = ((float*)&Parent->ControlSize)[invO] - ((float*)&items[0]->ControlSize)[invO] * 2;
+			}
+			StackPanel::UpdateLayout();
 		}
 	protected:
 		RepeatButton* decreaseBtn, * increaseBtn;
@@ -1229,6 +1248,27 @@ namespace Controls
 			slider->SetValue(slider->Value + 0.01f);
 		}
 		Slider* mSlider;
+	};
+
+	class ScrollViewer : Grid
+	{
+	public:
+		ScrollViewer(Murrela* murla, Alignments alignment, D2D1_SIZE_F controlSize = {}) : Grid(murla, alignment, controlSize)
+		{
+			AppendPos(0);
+			AppendPos(1);
+			AppendPos(0, {(short)1, 0.0f, 20.0f});
+			AppendPos(1, { (short)1, 0.0f, 20.0f });
+			AppendItem((Control*)new ScrollBar(murla, Stretch), 1, 0);
+			AppendItem((Control*)new ScrollBar(murla, Stretch, {}, false), 0, 1);
+		}
+
+		void SetContent(Control* _content)
+		{
+			if (items.size() == 3)
+				RemoveItem(*items.end());
+			AppendItem(_content);
+		}
 	};
 
 	class Tab : public ItemsContainer

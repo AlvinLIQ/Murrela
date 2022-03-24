@@ -1,4 +1,3 @@
-/*
 #include "../Murrela/Headers/CoreApp.h"
 
 using namespace Controls;
@@ -8,24 +7,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	CoreApp* coreApp = new CoreApp(hInstance);
 
 	//UI
-	Grid* mGrid;
-	coreApp->content = mGrid = new Grid(coreApp->murrela, Controls::Stretch);
-	mGrid->AppendItem((Control*)new TextBlock(L"Sample Text", coreApp->murrela, Left | Top, Center));
-	mGrid->AppendItem((Control*)new TextBox(coreApp->murrela, Right | Top, {180, 40}));
-	Button* addTabBtn;
-	mGrid->AppendItem((Control*)(addTabBtn = new Button(L"Add Tab", coreApp->murrela, Center, {100, 40})));
-
-	TabContainer* tabContainer;
-	mGrid->AppendItem((Control*)(tabContainer = new TabContainer(coreApp->murrela, Left | Bottom, {0, 30})));
-	addTabBtn->ClickEvent.param = (void*)tabContainer;
-	addTabBtn->Clicked.push_back([](void* param)
-	{
-			TabContainer* tabCon = (TabContainer*)param;
-			tabCon->AppendItem(new Tab(L"Tab", tabCon->GetMurrela(), Left | Stretch));
-	});
+	ScrollViewer* mGrid;
+	coreApp->content = (Control*)(mGrid = new ScrollViewer(coreApp->murrela, Controls::Stretch));
+	mGrid->SetContent((Control*)new TextBox(coreApp->murrela, Stretch, {}));
+//	mGrid->AppendItem((Control*)new TextBox(coreApp->murrela, Stretch, {}));
 //	tabContainer->AppendItem(new Tab(L"Tab", tabContainer->GetMurrela(), Left | Stretch));
 	coreApp->Run();
 	coreApp->~CoreApp();
 	return 0;
 }
-*/

@@ -475,6 +475,29 @@ namespace Controls
 				Controls::_ReDrawRequest();
 				return;
 			}
+			case 22:
+			{
+				if (!IsClipboardFormatAvailable(CF_TEXT) || !OpenClipboard(murrela->GetWindow()))
+					return;
+				auto hlgb = GetClipboardData(CF_TEXT);
+				if (hlgb != NULL)
+				{
+					auto lpstr = GlobalLock(hlgb);
+					if (lpstr != NULL)
+					{
+						InsertTextAt(ctowc((const char*)lpstr), cursor);
+						GlobalUnlock(lpstr);
+					}
+				}
+				//InsertTextAt()
+				CloseClipboard();
+				Controls::_ReDrawRequest();
+			}
+				break;
+			case 24:
+				ClearSelection();
+				Controls::_ReDrawRequest();
+				break;
 			default:
 				ClearSelection();
 				if (cursor == length)
@@ -524,6 +547,34 @@ namespace Controls
 		{
 			return text.c_str();
 		}
+		void InsertTextAt(const wchar_t *nText, UINT32 iIndex = -1, UINT32 nLen = -1)
+		{
+			if (nLen == -1)
+				nLen = wcsnlen_s(nText, -1);
+			
+			if (selectionMetrics.size())
+			{
+				UINT32 tPos = (*selectionMetrics.begin()).textPosition;
+				if (tPos < iIndex)
+					iIndex = tPos;
+				tPos = (*selectionMetrics.end()).textPosition;
+				if (tPos < iIndex)
+					iIndex = tPos;
+
+				ClearSelection();
+				cursor += nLen;
+			}
+
+			size_t tLen = text.length();
+			if (iIndex > tLen)
+				text += nText;
+			else
+				text = text.substr(0, iIndex) + nText + text.substr(iIndex, tLen - iIndex);
+			length += nLen;
+
+			UpdateText();
+			UpdateCursor();
+		}
 
 		void MoveTo(unsigned int textPosition)
 		{
@@ -559,16 +610,18 @@ namespace Controls
 				brushIndex = 1;
 
 #ifdef _UWP
-			Windows::UI::Core::CoreWindow::GetForCurrentThread()->PointerCursor = ref new Windows::UI::Core::CoreCursor(Windows::UI::Core::CoreCursorType::IBeam, 0);
+			Windows::UI::Core::CoreWindow::GetForCurrentThread()->PointerCursor = ref new Windows::UI::Core::CoreCursor(Windows::UI::Core::CoreCursorType::IBEAM, 0);
 #else
 			SetCursor(LoadCursor(NULL, IDC_IBEAM));
 #endif
+
 			Control::PointerEntered(pPosition, pState);
 		}
 		void PointerExited(D2D1_POINT_2F* pPosition, short pState)
 		{
 			if (brushIndex != 2)
 				brushIndex = 0;
+
 
 #ifdef _UWP
 			Windows::UI::Core::CoreWindow::GetForCurrentThread()->PointerCursor = ref new Windows::UI::Core::CoreCursor(Windows::UI::Core::CoreCursorType::Arrow, 0);
@@ -588,7 +641,8 @@ namespace Controls
 		{
 			if (pointerState == 2 && textLayout != nullptr)
 				SelectPosition(GetPositionForCurrent(*pPosition));
-
+			
+			SetCursor(LoadCursor(NULL, IDC_IBEAM));
 			Control::PointerMoved(pPosition, pState);
 		}
 

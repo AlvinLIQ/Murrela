@@ -25,7 +25,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 CoreApp::CoreApp(HINSTANCE hInstance)
 {
 	WNDCLASS wc = {};
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+//	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.lpfnWndProc = WindowProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = L"Sample";

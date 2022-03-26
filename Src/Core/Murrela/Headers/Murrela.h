@@ -32,6 +32,26 @@ static D2D1_SIZE_F RectToSize(D2D1_RECT_F tRect)
 	return D2D1::SizeF(tRect.right - tRect.left, tRect.bottom - tRect.top);
 }
 
+static std::string wctos(const wchar_t* source)
+{
+	size_t sLen = wcslen(source);
+	char* c = new char[sLen * 3 + 1];
+	WideCharToMultiByte(CP_UTF8, 0, source, (int)(sLen + 1), c, (int)(sLen * 3 + 1), 0, 0);
+
+	std::string result = c;
+	delete[] c;
+	return result;
+}
+
+static wchar_t* ctowc(const char* source)
+{
+	wchar_t* result;
+	int sLen, rLen = MultiByteToWideChar(CP_UTF8, 0, source, sLen = (int)strlen(source), NULL, 0);
+	result = new wchar_t[rLen + 1];
+	MultiByteToWideChar(CP_UTF8, 0, source, sLen, result, rLen);
+	result[rLen] = '\0';
+	return result;
+}
 
 class Murrela
 {

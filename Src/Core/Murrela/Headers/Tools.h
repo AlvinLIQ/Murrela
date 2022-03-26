@@ -1,11 +1,11 @@
 #pragma once
 #include <iostream>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+//#include <winsock2.h>
+//#include <ws2tcpip.h>
 #include <windows.h>
 //#include <libssh2.h>
 
-#pragma comment(lib,"ws2_32.lib")
+//#pragma comment(lib,"ws2_32.lib")
 
 const wchar_t* GetAppFolderPath()
 {
@@ -19,12 +19,13 @@ const wchar_t* GetAppFolderPath()
 void ReadFileFromPath(std::wstring PathToFile, void** result)
 {
 	FILE* fp;
-	_wfopen_s(&fp, (PathToFile).c_str(), L"r");
-	fseek(fp, SEEK_END, 0);
+	_wfopen_s(&fp, (PathToFile).c_str(), L"rb");
+	fseek(fp, 0, SEEK_END);
 	long fileSize = ftell(fp);
-	fseek(fp, SEEK_SET, 0);
-	*result = new wchar_t[fileSize];
-	fgetws((wchar_t*)*result, fileSize, fp);
+	fseek(fp, 0, SEEK_SET);
+	*result = new char[fileSize];
+	fread(*result, 1, fileSize, fp);
+	((char*)* result)[fileSize] = '\0';
 	fclose(fp);
 }
 
@@ -33,6 +34,7 @@ void ReadFileFromAppFolderW(std::wstring PathToFile, void** result)
 	ReadFileFromPath(GetAppFolderPath() + PathToFile, result);
 }
 
+/*
 #define httpRequest struct http_req
 #define httpResponse struct http_res
 
@@ -121,27 +123,7 @@ void closeSocket(const SOCKET* s_fd)
 	closesocket(*s_fd);
 	WSACleanup();
 }
-
-std::string wctos(const wchar_t* source)
-{
-	size_t sLen = wcslen(source);
-	char* c = new char[sLen * 3 + 1];
-	WideCharToMultiByte(CP_UTF8, 0, source, (int)(sLen + 1), c, (int)(sLen * 3 + 1), 0, 0);
-
-	std::string result = c;
-	delete[] c;
-	return result;
-}
-
-wchar_t* ctowc(const char* source)
-{
-	wchar_t* result;
-	int sLen, rLen = MultiByteToWideChar(CP_UTF8, 0, source, sLen = (int)strlen(source), NULL, 0);
-	result = new wchar_t[rLen + 1];
-	MultiByteToWideChar(CP_UTF8, 0, source, sLen, result, rLen);
-	result[rLen] = '\0';
-	return result;
-}
+*/
 /*
 void SSHConnect(const wchar_t* ip, LONG port, const wchar_t* username, const wchar_t* passwd)
 {

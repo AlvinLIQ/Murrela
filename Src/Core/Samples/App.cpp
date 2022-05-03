@@ -12,9 +12,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	coreApp->content = (Control*)(mGrid = new ScrollViewer(coreApp->murrela, Controls::Stretch));
 	TextBox* tb;
 	mGrid->SetContent((Control*)(tb = new TextBox(coreApp->murrela, Stretch)));
-	const char* result;
-	ReadFileFromPath(L"D:/Dev/PHPServer/index.php", (void**)&result);
-	tb->InsertTextAt(ctowc(result));
+//	const char* result;
+//	ReadFileFromPath(L"D:/Dev/PHPServer/index.php", (void**)&result);
+//	tb->InsertTextAt(ctowc(result));
 //	mGrid->AppendItem((Control*)new TextBox(coreApp->murrela, Stretch, {}));
 //	tabContainer->AppendItem(new Tab(L"Tab", tabContainer->GetMurrela(), Left | Stretch));
 	coreApp->Run();

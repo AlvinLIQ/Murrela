@@ -25,7 +25,6 @@ namespace Controls
 #define HAS_PARENT (Parent != nullptr)
 	typedef char Alignments;
 	const Alignments Left = 1, Top = 2, Right = 4, Bottom = 8, Center = 16, Stretch = 32;
-	const FLOAT AutoL = 0.0f;
 	class Control
 	{
 	public:
@@ -330,7 +329,7 @@ namespace Controls
 		D2D1_POINT_2F offsets;
 
 	protected:
-		virtual void Init()
+		void Init()
 		{
 			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 1.0f, 1.0f , 1.0f }, &brush);
 		}
@@ -475,6 +474,27 @@ namespace Controls
 				Controls::_ReDrawRequest();
 				return;
 			}
+			case 1:
+				cursor = 0;
+				Select(length);
+				break;
+			case 3:
+			{
+				if (!OpenClipboard(murrela->GetWindow()))
+					return;
+
+				auto pcstrS = wctoc(GetSelectionText().c_str());
+				auto pcstrLen = strnlen(pcstrS, -1);
+				auto hlgb = GlobalAlloc(GMEM_MOVEABLE, sizeof(wchar_t) * pcstrLen);
+				auto pcstrC = GlobalLock(hlgb);
+				memcpy(pcstrC, pcstrS,pcstrLen);
+				GlobalUnlock(hlgb);
+				SetClipboardData(CF_TEXT, hlgb);
+				//InsertTextAt()
+				CloseClipboard();
+				Controls::_ReDrawRequest();
+				break;
+			}
 			case 22:
 			{
 				if (!IsClipboardFormatAvailable(CF_TEXT) || !OpenClipboard(murrela->GetWindow()))
@@ -547,6 +567,25 @@ namespace Controls
 		{
 			return text.c_str();
 		}
+
+		const std::wstring GetSelectionText()
+		{
+			size_t _size = selectionMetrics.size();
+			std::wstring sText = L"";
+			if (_size)
+			{
+				size_t _offset = 0, _off;
+				for (size_t i = 0; i < _size; i++)
+				{
+					DWRITE_HIT_TEST_METRICS& tMetrics = selectionMetrics[i];
+					_off = tMetrics.textPosition - _offset;
+					sText += text.substr(_off, tMetrics.length);
+				}
+			}
+
+			return sText;
+		}
+
 		void InsertTextAt(const wchar_t *nText, UINT32 iIndex = -1, UINT32 nLen = -1)
 		{
 			if (nLen == -1)

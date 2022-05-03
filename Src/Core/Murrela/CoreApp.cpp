@@ -3,6 +3,7 @@
 #endif
 
 #include "Headers/CoreApp.h"
+#include <dwmapi.h>
 
 using namespace Controls;
 
@@ -72,6 +73,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
+	case WM_CREATE:
+		if (hwnd)
+		{
+			DWM_WINDOW_CORNER_PREFERENCE preference = DWMWCP_DONOTROUND;
+			DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &preference, sizeof(preference));
+		}
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		Controls::_StopReDrawLoop();

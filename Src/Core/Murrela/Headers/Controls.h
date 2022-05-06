@@ -485,7 +485,7 @@ namespace Controls
 
 				auto pcstrS = wctoc(GetSelectionText().c_str());
 				auto pcstrLen = strnlen(pcstrS, -1);
-				auto hlgb = GlobalAlloc(GMEM_MOVEABLE, sizeof(wchar_t) * pcstrLen);
+				auto hlgb = GlobalAlloc(GMEM_MOVEABLE, pcstrLen + 1);
 				auto pcstrC = GlobalLock(hlgb);
 				memcpy(pcstrC, pcstrS,pcstrLen);
 				GlobalUnlock(hlgb);
@@ -505,7 +505,9 @@ namespace Controls
 					auto lpstr = GlobalLock(hlgb);
 					if (lpstr != NULL)
 					{
+						size_t prevLen = length;
 						InsertTextAt(ctowc((const char*)lpstr), cursor);
+						cursor += length - prevLen;
 						GlobalUnlock(lpstr);
 					}
 				}
@@ -515,11 +517,27 @@ namespace Controls
 			}
 				break;
 			case 24:
+			{
+				if (!OpenClipboard(murrela->GetWindow()))
+					return;
+
+				auto pcstrS = wctoc(GetSelectionText().c_str());
+				auto pcstrLen = strnlen(pcstrS, -1);
+				auto hlgb = GlobalAlloc(GMEM_MOVEABLE, pcstrLen + 1);
+				auto pcstrC = GlobalLock(hlgb);
+				memcpy(pcstrC, pcstrS, pcstrLen);
+				GlobalUnlock(hlgb);
+				SetClipboardData(CF_TEXT, hlgb);
+				//InsertTextAt()
+				CloseClipboard();
+			}
 				ClearSelection();
 				Controls::_ReDrawRequest();
 				break;
 			default:
 				ClearSelection();
+				if (keyCode == '\r')
+					keyCode = '\n';
 				if (cursor == length)
 					text += (wchar_t)keyCode;
 				else
@@ -548,7 +566,7 @@ namespace Controls
 			}
 			if (textLayout != nullptr)
 			{
-				murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + 2, topMargin), textLayout, brushes[3], D2D1_DRAW_TEXT_OPTIONS_NONE);
+				murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + 2, topMargin), textLayout, brushes[3], D2D1_DRAW_TEXT_OPTIONS::D2D1_DRAW_TEXT_OPTIONS_NONE);
 			}
 			if (brushIndex == 2)
 			{
@@ -631,7 +649,10 @@ namespace Controls
 				{
 					cursorX = hitTestMetrics.left + hitTestMetrics.width;
 					//	cursorY = hitTestMetrics.top - hitTestMetrics.height;
-					cursor = hitTestMetrics.textPosition + 1;
+					if (text[hitTestMetrics.textPosition] == '\r' || text[hitTestMetrics.textPosition] == '\n')
+						cursor = hitTestMetrics.textPosition;
+					else
+						cursor = hitTestMetrics.textPosition + 1;
 				}
 				else
 				{
@@ -763,6 +784,15 @@ namespace Controls
 //			textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 			DWRITE_TEXT_METRICS textMetrics;
 			textLayout->GetMetrics(&textMetrics);
+
+			DWRITE_TEXT_RANGE textRange;
+			DWRITE_HIT_TEST_METRICS hitTestMetrics;
+			BOOL isTrailingHit, isInside;
+			textLayout->HitTestPoint(textMetrics.left + offsetX, textMetrics.top + offsetY, &isTrailingHit, &isInside, &hitTestMetrics);
+			textRange.startPosition = hitTestMetrics.textPosition;
+			textLayout->HitTestPoint(textMetrics.left + offsetX + ControlSize.width, textMetrics.top + offsetY + ControlSize.height, &isTrailingHit, &isInside, &hitTestMetrics);
+			textRange.length = hitTestMetrics.textPosition - textRange.startPosition;
+			textLayout->SetDrawingEffect(NULL, textRange);
 			 
 			SizeRequest({ textMetrics.widthIncludingTrailingWhitespace + 5 , textMetrics.height + 10 });
 		}
@@ -790,7 +820,7 @@ namespace Controls
 		}
 
 		unsigned int cursor = 0, length = 0;
-		float cursorX = 0.0f, cursorY = 0.0f, textHeight = 0.0f;
+		float cursorX = 0.0f, cursorY = 0.0f, offsetX = 0.0f, offsetY = 0.0f, textHeight = 0.0f;
 		short brushIndex = 0;
 	protected:
 	};

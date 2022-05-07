@@ -791,10 +791,12 @@ namespace Controls
 			textLayout->HitTestPoint(textMetrics.left + offsetX, textMetrics.top + offsetY, &isTrailingHit, &isInside, &hitTestMetrics);
 			textRange.startPosition = hitTestMetrics.textPosition;
 			textLayout->HitTestPoint(textMetrics.left + offsetX + ControlSize.width, textMetrics.top + offsetY + ControlSize.height, &isTrailingHit, &isInside, &hitTestMetrics);
-			textRange.length = hitTestMetrics.textPosition - textRange.startPosition;
-			textLayout->SetDrawingEffect(NULL, textRange);
+			textRange.length = hitTestMetrics.textPosition + 1 - textRange.startPosition;
+
+			SafeRelease((IUnknown**)&textLayout);
+			murrela->wrtFactory->CreateTextLayout(text.substr(textRange.startPosition, textRange.length).c_str(), (UINT32)textRange.length, murrela->txtFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 			 
-			SizeRequest({ textMetrics.widthIncludingTrailingWhitespace + 5 , textMetrics.height + 10 });
+//			SizeRequest({ textMetrics.widthIncludingTrailingWhitespace + 5 , textMetrics.height + 10 });
 		}
 		void UpdateCursor()
 		{

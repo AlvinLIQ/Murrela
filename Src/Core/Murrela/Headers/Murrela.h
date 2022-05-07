@@ -51,6 +51,22 @@ static wchar_t* ctowc(const char* source)
 	return result;
 }
 
+static void CopyWCStr(const wchar_t* wStr)
+{
+	if (!OpenClipboard(NULL))
+		return;
+
+	auto pcstrS = wctoc(wStr);
+	auto pcstrLen = strnlen(pcstrS, -1);
+	auto hlgb = GlobalAlloc(GMEM_MOVEABLE, pcstrLen + 1);
+	auto pcstrC = GlobalLock(hlgb);
+	memcpy(pcstrC, pcstrS, pcstrLen);
+	GlobalUnlock(hlgb);
+	SetClipboardData(CF_TEXT, hlgb);
+	//InsertTextAt()
+	CloseClipboard();
+}
+
 class Murrela
 {
 public:

@@ -480,6 +480,7 @@ namespace Controls
 				break;
 			case 3:
 			{
+				/*
 				if (!OpenClipboard(murrela->GetWindow()))
 					return;
 
@@ -492,6 +493,9 @@ namespace Controls
 				SetClipboardData(CF_TEXT, hlgb);
 				//InsertTextAt()
 				CloseClipboard();
+				*/
+
+				CopyWCStr(GetSelectionText().c_str());
 				Controls::_ReDrawRequest();
 				break;
 			}
@@ -517,20 +521,8 @@ namespace Controls
 			}
 				break;
 			case 24:
-			{
-				if (!OpenClipboard(murrela->GetWindow()))
-					return;
+				CopyWCStr(GetSelectionText().c_str());
 
-				auto pcstrS = wctoc(GetSelectionText().c_str());
-				auto pcstrLen = strnlen(pcstrS, -1);
-				auto hlgb = GlobalAlloc(GMEM_MOVEABLE, pcstrLen + 1);
-				auto pcstrC = GlobalLock(hlgb);
-				memcpy(pcstrC, pcstrS, pcstrLen);
-				GlobalUnlock(hlgb);
-				SetClipboardData(CF_TEXT, hlgb);
-				//InsertTextAt()
-				CloseClipboard();
-			}
 				ClearSelection();
 				Controls::_ReDrawRequest();
 				break;

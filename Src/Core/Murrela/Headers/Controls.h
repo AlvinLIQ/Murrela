@@ -556,7 +556,7 @@ namespace Controls
 				DWRITE_HIT_TEST_METRICS& tMetrics = selectionMetrics[i];
 				murrela->d2dContext->FillRectangle(D2D1::RectF(tMetrics.left, tMetrics.top, tMetrics.left + tMetrics.width, tMetrics.top + tMetrics.height), brushes[1]);
 			}
-			if (textLayout != nullptr)
+			if (textLayout != nullptr && !isTextLayoutLocked)
 			{
 				murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + 2, topMargin), textLayout, brushes[3], D2D1_DRAW_TEXT_OPTIONS::D2D1_DRAW_TEXT_OPTIONS_NONE);
 			}
@@ -769,8 +769,11 @@ namespace Controls
 		ID2D1Layer* d2dLayer;
 		std::vector<DWRITE_HIT_TEST_METRICS> selectionMetrics;
 
+		bool isTextLayoutLocked = false;
+
 		void UpdateText()
 		{
+			isTextLayoutLocked = true;
 			SafeRelease((IUnknown**)&textLayout);
 			murrela->wrtFactory->CreateTextLayout(text.c_str(), (UINT32)length, murrela->txtFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 //			textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
@@ -787,7 +790,8 @@ namespace Controls
 
 			SafeRelease((IUnknown**)&textLayout);
 			murrela->wrtFactory->CreateTextLayout(text.substr(textRange.startPosition, textRange.length).c_str(), (UINT32)textRange.length, murrela->txtFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
-			 
+			
+			isTextLayoutLocked = false;
 //			SizeRequest({ textMetrics.widthIncludingTrailingWhitespace + 5 , textMetrics.height + 10 });
 		}
 		void UpdateCursor()

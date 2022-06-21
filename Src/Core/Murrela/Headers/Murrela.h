@@ -11,6 +11,7 @@
 #ifndef _UWP
 #include <vector>
 #include <string>
+#include <thread>
 #include <Windows.h>
 #include <wrl/client.h>
 #include <time.h>

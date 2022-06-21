@@ -84,9 +84,10 @@ void Controls::_KeyReceived(unsigned int keycode, bool isReleased)
 
 DWORD Controls::_ReDrawLoop(_In_ LPVOID content)
 {
-	while (*pDrawSignal)
+	auto ts = pDrawSignal;
+	while (*ts)
 	{
-		if (*pDrawSignal == 1)
+		if (*ts == 1)
 		{
 			(*(Controls::Control**)content)->ReDraw();
 			_Drew();
@@ -97,7 +98,9 @@ DWORD Controls::_ReDrawLoop(_In_ LPVOID content)
 
 void Controls::_StartReDrawLoop(Control** content)
 {
-	drawThread = CreateThread(NULL, 0, Controls::_ReDrawLoop, (LPVOID)content, 0, 0);
+	std::thread dThread(Controls::_ReDrawLoop, content);
+	dThread.detach();
+//	drawThread = CreateThread(NULL, 0, Controls::_ReDrawLoop, (LPVOID)content, 0, 0);
 }
 
 void Controls::_StopReDrawLoop()

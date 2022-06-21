@@ -8,10 +8,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	CoreApp* coreApp = new CoreApp(hInstance);
 
 	//UI
-	ScrollViewer* mGrid;
-	coreApp->content = (Control*)(mGrid = new ScrollViewer(coreApp->murrela, Controls::Stretch));
+//	ScrollViewer* mGrid;
+//	coreApp->content = (Control*)(mGrid = new ScrollViewer(coreApp->murrela, Controls::Stretch));
 	TextBox* tb;
-	mGrid->SetContent((Control*)(tb = new TextBox(coreApp->murrela, Stretch)));
+	coreApp->content = (Control*)(tb = new TextBox(coreApp->murrela, Stretch));
+//	mGrid->SetContent((Control*)(tb = new TextBox(coreApp->murrela, Stretch)));
 //	const char* result;
 //	ReadFileFromPath(L"D:/Dev/PHPServer/index.php", (void**)&result);
 //	tb->InsertTextAt(ctowc(result));

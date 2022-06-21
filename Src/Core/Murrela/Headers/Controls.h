@@ -169,7 +169,8 @@ namespace Controls
 		virtual void UpdateLayout()
 		{
 			D2D1_RECT_F pRect = GetParentRect();
-			D2D1_SIZE_F pSize = GetParentSize();
+			D2D1_SIZE_F pSize = GetParentSize(), prevSize = ControlSize;
+
 			if (Alignment & Left)
 			{
 				ControlOffset.x = pRect.left;
@@ -204,6 +205,11 @@ namespace Controls
 				ControlOffset.y = pRect.top;
 				ControlSize.height = pRect.bottom - pRect.top;
 			}
+
+			if (prevSize.height != ControlSize.height || prevSize.width != ControlSize.width)
+			{
+				SizeChanged(ControlSize);
+			}
 		}
 		virtual void SizeChanged(D2D1_SIZE_F newSize)
 		{
@@ -212,6 +218,11 @@ namespace Controls
 		virtual D2D1_RECT_F GetRectForRender()
 		{
 			return { ControlOffset.x, ControlOffset.y, ControlOffset.x + ControlSize.width, ControlOffset.y + ControlSize.height };
+		}
+
+		virtual D2D1_SIZE_F GetRealSize()
+		{
+			return ControlSize;
 		}
 
 		void SetParent(Control* nParent)
@@ -554,11 +565,14 @@ namespace Controls
 			for (size_t i = 0; i < _size; i++)
 			{
 				DWRITE_HIT_TEST_METRICS& tMetrics = selectionMetrics[i];
+				tMetrics.top -= offsetY;
+				tMetrics.left -= offsetX;
 				murrela->d2dContext->FillRectangle(D2D1::RectF(tMetrics.left, tMetrics.top, tMetrics.left + tMetrics.width, tMetrics.top + tMetrics.height), brushes[1]);
 			}
-			if (textLayout != nullptr && !isTextLayoutLocked)
+			if (drawingTextLayout != nullptr)
 			{
-				murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + 2, topMargin), textLayout, brushes[3], D2D1_DRAW_TEXT_OPTIONS::D2D1_DRAW_TEXT_OPTIONS_NONE);
+				while (isTextLayoutLocked);
+				murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + 2, topMargin), drawingTextLayout, brushes[3], D2D1_DRAW_TEXT_OPTIONS::D2D1_DRAW_TEXT_OPTIONS_NONE);
 			}
 			if (brushIndex == 2)
 			{
@@ -763,21 +777,31 @@ namespace Controls
 
 			return false;
 		}
+
+		void SizeChanged(D2D1_SIZE_F newSize)
+		{
+			UpdateText();
+		}
+
+		D2D1_SIZE_F GetRealSize()
+		{
+			return { textMetrics.widthIncludingTrailingWhitespace + 5.0f , textMetrics.height + 10.0f };
+		}
 	private:
 		std::wstring text = L"";
-		IDWriteTextLayout* textLayout = nullptr;
+		IDWriteTextLayout* textLayout = nullptr, *drawingTextLayout = nullptr;
 		ID2D1Layer* d2dLayer;
 		std::vector<DWRITE_HIT_TEST_METRICS> selectionMetrics;
 
 		bool isTextLayoutLocked = false;
 
+		DWRITE_TEXT_METRICS textMetrics = {};
 		void UpdateText()
 		{
 			isTextLayoutLocked = true;
 			SafeRelease((IUnknown**)&textLayout);
 			murrela->wrtFactory->CreateTextLayout(text.c_str(), (UINT32)length, murrela->txtFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
 //			textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
-			DWRITE_TEXT_METRICS textMetrics;
 			textLayout->GetMetrics(&textMetrics);
 
 			DWRITE_TEXT_RANGE textRange;
@@ -788,8 +812,8 @@ namespace Controls
 			textLayout->HitTestPoint(textMetrics.left + offsetX + ControlSize.width, textMetrics.top + offsetY + ControlSize.height, &isTrailingHit, &isInside, &hitTestMetrics);
 			textRange.length = hitTestMetrics.textPosition + 1 - textRange.startPosition;
 
-			SafeRelease((IUnknown**)&textLayout);
-			murrela->wrtFactory->CreateTextLayout(text.substr(textRange.startPosition, textRange.length).c_str(), (UINT32)textRange.length, murrela->txtFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &textLayout);
+			SafeRelease((IUnknown**)&drawingTextLayout);
+			murrela->wrtFactory->CreateTextLayout(text.substr(textRange.startPosition, textRange.length).c_str(), (UINT32)textRange.length, murrela->txtFormat.Get(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), &drawingTextLayout);
 			
 			isTextLayoutLocked = false;
 //			SizeRequest({ textMetrics.widthIncludingTrailingWhitespace + 5 , textMetrics.height + 10 });
@@ -814,7 +838,7 @@ namespace Controls
 
 		D2D1_POINT_2F GetOffset()
 		{
-			return D2D1::Point2F(ControlOffset.x + 2, ControlOffset.y + 5);
+			return D2D1::Point2F(ControlOffset.x + 2 + offsetX, ControlOffset.y + 5 + offsetY);
 		}
 
 		unsigned int cursor = 0, length = 0;
@@ -1265,7 +1289,7 @@ namespace Controls
 			int o = (int)orientation, invO = (int)!orientation;
 			cOffset[invO] = mOffset[invO];
 			cSize[invO] = mSize[invO];
-			cSize[o] = Step;
+			cSize[o] = GetSliderSizeForRender();
 			cOffset[o] = Value * mSize[o] + mOffset[o];
 			if (cOffset[o] + cSize[o] > mOffset[o] + mSize[o])
 				cOffset[o] = mOffset[o] + mSize[o] - cSize[o];
@@ -1279,7 +1303,7 @@ namespace Controls
 			{
 				int o = (int)orientation;
 				float* pos = (float*)pPosition;
-				SetValue((pos[o] - Step / 2 - mOffset[o]) / mSize[o]);
+				SetValue((pos[o] - GetSliderSizeForRender() / 2 - mOffset[o]) / mSize[o]);
 			}
 		}
 
@@ -1288,7 +1312,7 @@ namespace Controls
 			ChildContainer::PointerPressed(pPosition, pState);
 			int o = (int)orientation;
 			float* pos = (float*)pPosition;
-			SetValue((pos[o] - Step / 2 - mOffset[o]) / mSize[o]);
+			SetValue((pos[o] - GetSliderSizeForRender() / 2 - mOffset[o]) / mSize[o]);
 		}
 
 		void SetValue(float newValue)
@@ -1308,10 +1332,14 @@ namespace Controls
 			cOffset[invO] = mOffset[invO];
 		}
 
+		float GetSliderSizeForRender()
+		{
+			return mSize[(int)orientation] < MaxValue ? mSize[(int)orientation] * mSize[(int)orientation] / MaxValue : mSize[(int)orientation];
+		}
+
 		float Value = 0.0f;
 		float MinValue = 0.0f;
 		float MaxValue = 1.0f;
-		float Step = 20.0f;
 	protected:
 		bool orientation;
 		float* cOffset, * cSize, * mOffset, * mSize;
@@ -1358,6 +1386,11 @@ namespace Controls
 			}
 			StackPanel::UpdateLayout();
 		}
+
+		void SetMaxValue(float newMaxValue)
+		{
+			mSlider->MaxValue = newMaxValue;
+		}
 	protected:
 		RepeatButton* decreaseBtn, * increaseBtn;
 		static void dBtn_Clicked(Slider* slider)
@@ -1380,8 +1413,8 @@ namespace Controls
 			AppendPos(1);
 			AppendPos(0, {(short)1, 0.0f, 20.0f});
 			AppendPos(1, { (short)1, 0.0f, 20.0f });
-			AppendItem((Control*)new ScrollBar(murla, Stretch), 1, 0);
-			AppendItem((Control*)new ScrollBar(murla, Stretch, {}, false), 0, 1);
+			AppendItem((Control*)(hScrollBar = new ScrollBar(murla, Stretch)), 1, 0);
+			AppendItem((Control*)(vScrollBar = new ScrollBar(murla, Stretch, {}, false)), 0, 1);
 		}
 
 		void SetContent(Control* _content)
@@ -1390,6 +1423,31 @@ namespace Controls
 				RemoveItem(*items.end());
 			AppendItem(_content);
 		}
+
+		Control* GetContent()
+		{
+			return items.size() == 3 ? items[2] : nullptr;
+		}
+
+		void UpdateLayout()
+		{
+			Grid::UpdateLayout();
+			UpdateScrollBar();
+		}
+
+		void UpdateScrollBar()
+		{
+			Control* content = GetContent();
+			if (content != nullptr)
+			{
+				D2D1_SIZE_F realSize = content->GetRealSize();
+				hScrollBar->SetMaxValue(realSize.height);
+				vScrollBar->SetMaxValue(realSize.width);
+			}
+		}
+
+	private:
+		ScrollBar* hScrollBar, *vScrollBar;
 	};
 
 	class Tab : public ItemsContainer

@@ -25,17 +25,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 */
 CoreApp::CoreApp(HINSTANCE hInstance)
 {
+	ResizeEvent.events = (PVOID)&SizeChanged;
 	WNDCLASS wc = {};
 //	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.lpfnWndProc = WindowProc;
+	wc.lpfnWndProc = CoreApp::WindowProc;
 	wc.hInstance = hInstance;
-	wc.lpszClassName = L"Sample";
+	wc.lpszClassName = L"Parkids";
 
 	RegisterClass(&wc);
 
 	coreWindow = CreateWindowEx(WS_EX_APPWINDOW, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, hInstance, NULL);
+		NULL, NULL, hInstance, this);
 
 	RECT scSize;
 	GetClientRect(coreWindow, &scSize);
@@ -59,7 +60,8 @@ void CoreApp::Run()
 
 
 	MSG msg = {};
-	
+	SetCursor(LoadCursor(NULL, IDC_ARROW));
+
 	Controls::_StartReDrawLoop(&content);
 
 	while (GetMessage(&msg, coreWindow, 0, 0))
@@ -69,7 +71,7 @@ void CoreApp::Run()
 	}
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -123,6 +125,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_SIZING:
 		coreApp->UpdateSize();
 		Controls::_ReDrawRequest();
+		coreApp->CallEvent(&coreApp->ResizeEvent);
 		break;
 	}
 	UpdateWindow(hwnd);

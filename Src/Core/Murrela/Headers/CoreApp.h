@@ -16,9 +16,20 @@ public:
 	Murrela* murrela = nullptr;
 	Controls::Control* content = nullptr;
 
+	std::vector<void(*)(void* param)> SizeChanged;
+	Controls::Control::NormalEvent ResizeEvent;
+	void CallEvent(Controls::Control::NormalEvent* tEvent)
+	{
+		auto events = (std::vector<void(*)(void* param)>*)tEvent->events;
+		for (auto i = events->begin(); i != events->end(); i++)
+		{
+			(*i)(tEvent->param);
+		}
+	}
+
 	void Run();
 	void UpdateSize();
-//	LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 private:
-	HWND coreWindow;
+	HWND coreWindow;	
 };

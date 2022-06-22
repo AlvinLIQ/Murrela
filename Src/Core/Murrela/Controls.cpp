@@ -7,7 +7,7 @@ clock_t passed, delay = 200;
 clock_t lastCount, currentCount;
 std::vector<void(*)(void* param)>* ticks = nullptr;
 void* tickParam;
-bool tickAbort = false;
+bool tickAbort = false, gameMode = true;
 //0 close 1 redraw 2 waiting 
 short drawSignal = 1;
 short* pDrawSignal = &drawSignal;
@@ -116,7 +116,8 @@ void Controls::_ReDrawRequest()
 
 void Controls::_Drew()
 {
-	*pDrawSignal = 2;
+	if (!gameMode)
+		*pDrawSignal = 2;
 }
 
 void ItemsContainer::PointerMoved(D2D1_POINT_2F* pPosition, short pState)

@@ -164,8 +164,6 @@ void Murrela::SetSize(D2D1_SIZE_F newSize)
         swapChainDesc.Scaling = DXGI_SCALING_NONE;
         dxgiFactory->CreateSwapChainForCoreWindow(dxgiDevice.Get(), coreWindow, &swapChainDesc, nullptr, dxgiSwapChain.GetAddressOf());
 #else
-        swapChainDesc.Width = 0;                           // use automatic sizing
-        swapChainDesc.Height = 0;
         swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // this is the most common swapchain format
         swapChainDesc.Stereo = false;
         swapChainDesc.SampleDesc.Count = 1;                // don't use multi-sampling

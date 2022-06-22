@@ -295,8 +295,41 @@ namespace Controls
 			text = newText;
 			Length = wcslen(newText);
 			SafeRelease((IUnknown**)&textLayout);
-			TextMetrics = murrela->GetWCStrWidth(newText, (UINT32)Length, &textLayout);
+			TextMetrics = murrela->GetWCStrWidth(newText, Length, &textLayout);
+			updateTextMetrics();
+		}
+		void SetFontSize(FLOAT fontSize)
+		{
+			if (textLayout != nullptr)
+			{
+				textLayout->SetFontSize(fontSize, { (UINT32)0, (UINT32)text.length() });
+				textLayout->GetMetrics(&TextMetrics);
+				updateTextMetrics();
+			}
+		}
+		const wchar_t* GetText()
+		{
+			return text.c_str();
+		}
 
+		Alignments TextAlignment;
+		DWRITE_TEXT_METRICS TextMetrics;
+
+		void Draw()
+		{
+			murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + offsets.x, ControlOffset.y + offsets.y), textLayout, brush);
+//			murrela->DrawShadow(GetRectForRender(), { 10.0f, 10.0f });
+		}
+
+
+	private:
+		std::wstring text;
+		ID2D1SolidColorBrush* brush;
+		IDWriteTextLayout* textLayout = nullptr;
+
+		D2D1_POINT_2F offsets;
+		void updateTextMetrics()
+		{
 			if (TextMetrics.widthIncludingTrailingWhitespace < maxWidth)
 				ControlSize.width = TextMetrics.widthIncludingTrailingWhitespace > minWidth ? TextMetrics.widthIncludingTrailingWhitespace : minWidth;
 			else
@@ -318,27 +351,6 @@ namespace Controls
 			else if (TextAlignment & Center)
 				offsets.y = (ControlSize.height - TextMetrics.height) / 2;
 		}
-		const wchar_t* GetText()
-		{
-			return text.c_str();
-		}
-
-		Alignments TextAlignment;
-		DWRITE_TEXT_METRICS TextMetrics;
-
-		void Draw()
-		{
-			murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + offsets.x, ControlOffset.y + offsets.y), textLayout, brush);
-//			murrela->DrawShadow(GetRectForRender(), { 10.0f, 10.0f });
-		}
-
-	private:
-		std::wstring text;
-		ID2D1SolidColorBrush* brush;
-		IDWriteTextLayout* textLayout = nullptr;
-
-		D2D1_POINT_2F offsets;
-
 	protected:
 		void Init()
 		{

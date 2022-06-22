@@ -31,5 +31,6 @@ public:
 	void UpdateSize();
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 private:
-	HWND coreWindow;	
+	HWND coreWindow;
+
 };

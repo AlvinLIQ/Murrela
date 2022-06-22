@@ -175,7 +175,7 @@ public:
 	{
 		return coreWindow;
 	}
-
+	PVOID CoreApp;
 private:
 #ifdef _UWP
 	IUnknown* coreWindow;

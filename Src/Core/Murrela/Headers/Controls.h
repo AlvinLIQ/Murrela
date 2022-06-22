@@ -966,7 +966,6 @@ namespace Controls
 		}
 		~ItemsContainer()
 		{
-			delete[] &items;
 		}
 
 		virtual void AppendItem(Control* newItem, size_t index = -1)
@@ -980,12 +979,15 @@ namespace Controls
 		virtual void RemoveItem(Control* target)
 		{
 			std::vector<Control*>::iterator tItem = items.begin(), eItem = items.end();
-			while (tItem++ != eItem)
+			while (tItem != eItem)
+			{
 				if (*tItem._Ptr == target)
 				{
 					items.erase(tItem);
 					break;
 				}
+				tItem++;
+			}
 		}
 
 		virtual void Draw()
@@ -1002,6 +1004,20 @@ namespace Controls
 		size_t GetItemsNum()
 		{
 			return items.size();
+		}
+
+		Control* GetAt(UINT32 index)
+		{
+			return index < items.size() ? items[index] : nullptr;
+		}
+		void RemoveAt(UINT32 index)
+		{
+			if (index < items.size())
+			{
+				auto it = items.begin();
+				std::advance(it, index);
+				items.erase(it);
+			}
 		}
 		void PointerMoved(D2D1_POINT_2F* pPosition, short pState);
 		void PointerExited(D2D1_POINT_2F* pPosition, short pState)
@@ -1191,24 +1207,23 @@ namespace Controls
 				cSize[o] = tSize[o] - cOffset[o];
 
 				if (tSize[invO] != cSize[invO])
-				{
 					cSize[invO] = tSize[invO];
-					for (i = 0; i < _size; i++)
-						switch (items[i]->Alignment)
-						{
-						case Center:
-							((float*)&items[i]->ControlOffset)[invO] = cOffset[invO] + (cSize[invO] - ((float*)&items[i]->ControlSize)[invO]) / 2;
-							break;
-						case Stretch:
-							((float*)&items[i]->ControlSize)[invO] = cSize[invO];
-						case Top:
-							((float*)&items[i]->ControlOffset)[invO] = cOffset[invO];
-							break;
-						case Bottom:
-							((float*)&items[i]->ControlOffset)[invO] = cOffset[invO] + cSize[invO] - ((float*)&items[i]->ControlSize)[invO];
-							break;
-						}
-				}
+
+				for (i = 0; i < _size; i++)
+					switch (items[i]->Alignment)
+					{
+					case Center:
+						((float*)&items[i]->ControlOffset)[invO] = cOffset[invO] + (cSize[invO] - ((float*)&items[i]->ControlSize)[invO]) / 2;
+						break;
+					case Stretch:
+						((float*)&items[i]->ControlSize)[invO] = cSize[invO];
+					case Top:
+						((float*)&items[i]->ControlOffset)[invO] = cOffset[invO];
+						break;
+					case Bottom:
+						((float*)&items[i]->ControlOffset)[invO] = cOffset[invO] + cSize[invO] - ((float*)&items[i]->ControlSize)[invO];
+						break;
+					}
 			}
 		}
 	};

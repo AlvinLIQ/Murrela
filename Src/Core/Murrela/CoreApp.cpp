@@ -12,8 +12,6 @@ short param;
 CoreApp* coreApp = nullptr;
 TRACKMOUSEEVENT tme;
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 /* run murrela ui
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int ParamNum)
 {
@@ -27,7 +25,7 @@ CoreApp::CoreApp(HINSTANCE hInstance)
 {
 	ResizeEvent.events = (PVOID)&SizeChanged;
 	WNDCLASS wc = {};
-//	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.lpfnWndProc = CoreApp::WindowProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = L"Parkids";
@@ -42,7 +40,7 @@ CoreApp::CoreApp(HINSTANCE hInstance)
 	GetClientRect(coreWindow, &scSize);
 	murrela = new Murrela(coreWindow, D2D1::SizeF((FLOAT)(scSize.right - scSize.left), (FLOAT)(scSize.bottom - scSize.top)));
 
-	coreApp = this;
+	murrela->CoreApp = coreApp = this;
 }
 
 void CoreApp::Run()
@@ -97,6 +95,7 @@ LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		Controls::_ReDrawRequest();
 		break;
 	case WM_MOUSEMOVE:
+//		SetCursor(LoadCursor(NULL, IDC_ARROW));
 		TrackMouseEvent(&tme);
 	case WM_MOUSELEAVE:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));

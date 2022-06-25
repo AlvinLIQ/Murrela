@@ -57,15 +57,19 @@ void CoreApp::Run()
 	//  content = (Control*)new Just_Editor::MainGrid(murrela);
 
 
-	MSG msg = {};
 	SetCursor(LoadCursor(NULL, IDC_ARROW));
 
 	Controls::_StartReDrawLoop(&content);
 
-	while (GetMessage(&msg, coreWindow, 0, 0))
+	MSG msg = {};
+	while (msg.message != WM_QUIT)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
+			DispatchMessage(&msg);
+		else
+		{
+			Controls::_ReDrawRequest();
+		}
 	}
 }
 
@@ -91,7 +95,7 @@ LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	case WM_IME_CHAR:
 	case WM_CHAR:
 		Controls::_CharacterReceived((unsigned int)wParam);
-		Controls::_ReDrawRequest();
+		//Controls::_ReDrawRequest();
 		break;
 	case WM_MOUSEMOVE:
 //		SetCursor(LoadCursor(NULL, IDC_ARROW));
@@ -99,30 +103,30 @@ LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	case WM_MOUSELEAVE:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
 		_PointerRequest(&curPos, 1, coreApp->content);
-		Controls::_ReDrawRequest();
+		//Controls::_ReDrawRequest();
 	break;
 	/*
 	case WM_NCMOUSEMOVE:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
 		_PointerRequest(&curPos, 1, coreApp->content);
-		Controls::_ReDrawRequest();
+		//Controls::_ReDrawRequest();
 		break;
 		*/
 	case WM_LBUTTONUP:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
 		coreApp->content->PointerReleased(&curPos, 4);
-		Controls::_ReDrawRequest();
+		//Controls::_ReDrawRequest();
 		break;
 	case WM_LBUTTONDOWN:
 		curPos = D2D1::Point2F((FLOAT)LOWORD(lParam), (FLOAT)HIWORD(lParam));
 		coreApp->content->PointerPressed(&curPos, 4);
-		Controls::_ReDrawRequest();
+		//Controls::_ReDrawRequest();
 		break;
 	case WM_MDIMAXIMIZE:
 	case WM_SIZE:
 	case WM_SIZING:
 		coreApp->UpdateSize();
-		Controls::_ReDrawRequest();
+		//Controls::_ReDrawRequest();
 		coreApp->CallEvent(&coreApp->ResizeEvent);
 		break;
 	}

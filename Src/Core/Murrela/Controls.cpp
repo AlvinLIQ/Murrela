@@ -7,7 +7,7 @@ clock_t passed, delay = 200;
 clock_t lastCount, currentCount;
 std::vector<void(*)(void* param)>* ticks = nullptr;
 void* tickParam;
-bool tickAbort = false, gameMode = true;
+bool tickAbort = false, gameMode = false;
 //0 close 1 redraw 2 waiting 
 short drawSignal = 1;
 short* pDrawSignal = &drawSignal;

@@ -53,6 +53,9 @@ void Murrela::InitD2D()
     DCompositionCreateDevice(dxgiDevice.Get(),
         __uuidof(IDCompositionDevice),
         reinterpret_cast<void**>(dCompDevice.GetAddressOf()));
+    ArrowCursor = LoadCursor(NULL, IDC_ARROW);
+    IbeamCursor = LoadCursor(NULL, IDC_IBEAM);
+    CurrentCursor = ArrowCursor;
 #endif
 
     SetSize(d2dSize);

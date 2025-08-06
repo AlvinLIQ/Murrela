@@ -288,6 +288,10 @@ namespace Controls
 			SetText(txt);
 			Init();
 		}
+		~TextBlock()
+		{
+			SafeRelease((IUnknown**)&brush);
+		}
 
 		size_t Length;
 		void SetText(const wchar_t* newText)
@@ -306,6 +310,11 @@ namespace Controls
 				textLayout->GetMetrics(&TextMetrics);
 				updateTextMetrics();
 			}
+		}
+		void SetColor(D2D1_COLOR_F color)
+		{
+			SafeRelease((IUnknown**)&brush);
+			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 0.0f, 0.0f , 1.0f }, &brush);
 		}
 		const wchar_t* GetText()
 		{
@@ -354,7 +363,7 @@ namespace Controls
 	protected:
 		void Init()
 		{
-			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 1.0f, 1.0f , 1.0f }, &brush);
+			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 0.0f, 0.0f , 1.0f }, &brush);
 		}
 	};
 
@@ -682,7 +691,7 @@ namespace Controls
 			}
 		}
 
-		void PointerEntered(D2D1_POINT_2F* pPosition, short pState)
+		void PointerEntered(D2D1_POINT_2F* pPosition, short pState) override
 		{
 			if (brushIndex != 2)
 				brushIndex = 1;
@@ -690,13 +699,16 @@ namespace Controls
 #ifdef _UWP
 			Windows::UI::Core::CoreWindow::GetForCurrentThread()->PointerCursor = ref new Windows::UI::Core::CoreCursor(Windows::UI::Core::CoreCursorType::IBEAM, 0);
 #else
-			SetCursor(LoadCursor(NULL, IDC_IBEAM));
+			murrela->CurrentCursor = murrela->IbeamCursor;
 #endif
 
 			Control::PointerEntered(pPosition, pState);
 		}
-		void PointerExited(D2D1_POINT_2F* pPosition, short pState)
+		void PointerExited(D2D1_POINT_2F* pPosition, short pState) override
 		{
+			if (IsInside(pPosition))
+				return;
+
 			if (brushIndex != 2)
 				brushIndex = 0;
 
@@ -704,23 +716,25 @@ namespace Controls
 #ifdef _UWP
 			Windows::UI::Core::CoreWindow::GetForCurrentThread()->PointerCursor = ref new Windows::UI::Core::CoreCursor(Windows::UI::Core::CoreCursorType::Arrow, 0);
 #else
-			SetCursor(LoadCursor(NULL, IDC_ARROW));
+			murrela->CurrentCursor = murrela->ArrowCursor;
+
 #endif
 			Control::PointerExited(pPosition, pState);
 		}
-		void PointerPressed(D2D1_POINT_2F* pPosition, short pState)
+		void PointerPressed(D2D1_POINT_2F* pPosition, short pState) override
 		{
 			brushIndex = 2;
 			CancelSelection();
 			MoveToPosition(GetPositionForCurrent(*pPosition));
 			Control::PointerPressed(pPosition, pState);
 		}
-		void PointerMoved(D2D1_POINT_2F* pPosition, short pState)
+		void PointerMoved(D2D1_POINT_2F* pPosition, short pState) override
 		{
 			if (pointerState == 2 && textLayout != nullptr)
 				SelectPosition(GetPositionForCurrent(*pPosition));
 			
-			SetCursor(LoadCursor(NULL, IDC_IBEAM));
+			murrela->CurrentCursor = murrela->IbeamCursor;
+			
 			Control::PointerMoved(pPosition, pState);
 		}
 

@@ -129,6 +129,9 @@ LRESULT CALLBACK CoreApp::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		//Controls::_ReDrawRequest();
 		coreApp->CallEvent(&coreApp->ResizeEvent);
 		break;
+	case WM_SETCURSOR:
+		SetCursor(coreApp->murrela->CurrentCursor);
+		return TRUE;
 	}
 	UpdateWindow(hwnd);
 //	SetLayeredWindowAttributes(coreWindow, 0x00FFFFFF, 0x80, LWA_COLORKEY);

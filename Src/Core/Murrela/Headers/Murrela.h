@@ -170,6 +170,9 @@ public:
 #ifdef _UWP
 	IUnknown* GetWindow()
 #else
+	HCURSOR IbeamCursor;
+	HCURSOR ArrowCursor;
+	HCURSOR CurrentCursor;
 	HWND GetWindow()
 #endif
 	{

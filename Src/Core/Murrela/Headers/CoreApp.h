@@ -7,7 +7,7 @@
 class CoreApp
 {
 public:
-	CoreApp(HINSTANCE hInstance);
+	CoreApp(HINSTANCE hInstance, LPCWSTR className = L"Murrela");
 	~CoreApp()
 	{
 
@@ -30,6 +30,10 @@ public:
 	void Run();
 	void UpdateSize();
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	HWND GetHandler()
+	{
+		return coreWindow;
+	}
 private:
 	HWND coreWindow;
 

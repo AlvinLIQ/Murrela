@@ -21,14 +21,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	return 0;
 }
 */
-CoreApp::CoreApp(HINSTANCE hInstance)
+CoreApp::CoreApp(HINSTANCE hInstance, LPCWSTR className)
 {
 	ResizeEvent.events = (PVOID)&SizeChanged;
 	WNDCLASS wc = {};
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.lpfnWndProc = CoreApp::WindowProc;
 	wc.hInstance = hInstance;
-	wc.lpszClassName = L"Parkids";
+	wc.lpszClassName = className;
 
 	RegisterClass(&wc);
 

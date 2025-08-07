@@ -1576,6 +1576,21 @@ namespace Controls
 
 	};
 	
+	class ProgressBar : Control
+	{
+	public:
+		ProgressBar(Murrela* murla, Alignments alignment, D2D1_SIZE_F blockSize = {}) : Control(murla, alignment, blockSize)
+		{
+			Init();
+		}
+		virtual void Draw() override
+		{
+			auto rect = GetRectForRender();
+			murrela->d2dContext->FillRectangle(rect, brushes[0]);
+			murrela->d2dContext->FillRectangle({rect.left, rect.top, rect.left + (rect.right - rect.left) * Value, rect.bottom}, brushes[1]);
+		}
+		float Value = 0.0f;
+	};
 
 	bool _IsControlFocused(Control* tControl);
 	void _CharacterReceived(unsigned int keycode);

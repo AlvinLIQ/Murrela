@@ -144,17 +144,22 @@ public:
 	void LoadBitmapFromFilename(const wchar_t* filename, ID2D1Bitmap1** bitmap)
 	{
 		IWICBitmapDecoder* bitmapDecoder = NULL;
-		wicFactory->CreateDecoderFromFilename(filename, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &bitmapDecoder);
+		if (wicFactory->CreateDecoderFromFilename(filename, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &bitmapDecoder) < 0)
+			return;
 
 		IWICBitmapFrameDecode* bitmapFrame = NULL;
-		bitmapDecoder->GetFrame(0, &bitmapFrame);
+		if (bitmapDecoder->GetFrame(0, &bitmapFrame) < 0)
+			return;
 		SafeRelease((IUnknown**)&bitmapDecoder);
 
 		IWICFormatConverter* bitmapConverter = NULL;
-		wicFactory->CreateFormatConverter(&bitmapConverter);
-		bitmapConverter->Initialize(bitmapFrame, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.f, WICBitmapPaletteTypeMedianCut);
+		if (wicFactory->CreateFormatConverter(&bitmapConverter) < 0)
+			return;
+		if (bitmapConverter->Initialize(bitmapFrame, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.f, WICBitmapPaletteTypeMedianCut) < 0)
+			return;
 
-		d2dContext->CreateBitmapFromWicBitmap(bitmapConverter, NULL, bitmap);
+		if (d2dContext->CreateBitmapFromWicBitmap(bitmapConverter, NULL, bitmap) < 0)
+			return;
 		SafeRelease((IUnknown**)&bitmapConverter);
 	}
 	D2D1_SIZE_F d2dSize;

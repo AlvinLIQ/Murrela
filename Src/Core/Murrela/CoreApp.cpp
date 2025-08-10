@@ -21,7 +21,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE pInstance, LPWSTR Param, int 
 	return 0;
 }
 */
-CoreApp::CoreApp(HINSTANCE hInstance, LPCWSTR className)
+CoreApp::CoreApp(HINSTANCE hInstance, LPCWSTR className, HICON icon)
 {
 	ResizeEvent.events = (PVOID)&SizeChanged;
 	WNDCLASS wc = {};
@@ -29,6 +29,7 @@ CoreApp::CoreApp(HINSTANCE hInstance, LPCWSTR className)
 	wc.lpfnWndProc = CoreApp::WindowProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = className;
+	wc.hIcon = icon;
 
 	RegisterClass(&wc);
 

@@ -7,7 +7,7 @@
 class CoreApp
 {
 public:
-	CoreApp(HINSTANCE hInstance, LPCWSTR className = L"Murrela");
+	CoreApp(HINSTANCE hInstance, LPCWSTR className = L"Murrela", HICON icon = NULL);
 	~CoreApp()
 	{
 

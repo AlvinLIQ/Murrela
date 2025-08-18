@@ -80,6 +80,10 @@ public:
 
 	void InitD2D();
 	void InitResources();
+	bool SaveTextureAsPNG(ID3D11Device* device,
+		ID3D11DeviceContext* context,
+		ID3D11Texture2D* texture,
+		const wchar_t* filename);
 
 	Microsoft::WRL::ComPtr<ID2D1Factory1> d2dFactory;
 	Microsoft::WRL::ComPtr<ID2D1Device> d2dDevice;
@@ -89,10 +93,13 @@ public:
 //	Microsoft::WRL::ComPtr<ID3D11Asynchronous> d3dAsynchronous;
 	Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
 	Microsoft::WRL::ComPtr<IDXGIFactory2> dxgiFactory;
+	Microsoft::WRL::ComPtr<IDXGIOutput> dxgiOutput;
+	Microsoft::WRL::ComPtr<IDXGIOutput1> dxgiOutput1;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> dxgiSwapChain;
 	Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
 	Microsoft::WRL::ComPtr<IDXGISurface> dxgiSurface;
+    Microsoft::WRL::ComPtr<ID2D1Bitmap1> d2dBitmap;
 #ifndef _UWP
 	Microsoft::WRL::ComPtr<IDCompositionDevice> dCompDevice;
 	Microsoft::WRL::ComPtr<IDCompositionTarget> dCompTarget;

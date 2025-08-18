@@ -1592,6 +1592,37 @@ namespace Controls
 		float Value = 0.0f;
 	};
 
+	class CaptureView : Control
+	{
+	public:
+		CaptureView(Murrela* murla, Alignments alignment, D2D1_SIZE_F blockSize = {}) : Control(murla, alignment, blockSize)
+		{
+			murla->dxgiOutput1->DuplicateOutput(murla->d3dDevice.Get(), &deskDupl);
+		}
+		~CaptureView()
+		{
+			deskDupl.Reset();
+		}
+
+
+		virtual void Draw() override
+		{
+			if (SUCCEEDED(deskDupl->AcquireNextFrame(100, &frameInfo, &desktopResource)))
+			{
+				Microsoft::WRL::ComPtr<ID3D11Texture2D> frame;
+				desktopResource.As(&frame);
+				murrela->SaveTextureAsPNG(murrela->d3dDevice.Get(), murrela->d3dContext.Get(), frame.Get(), L"test.png");
+				deskDupl->ReleaseFrame();
+				exit(0);
+			}
+		}
+	private:
+		DXGI_OUTDUPL_FRAME_INFO frameInfo;
+		Microsoft::WRL::ComPtr<IDXGIOutputDuplication> deskDupl;
+		Microsoft::WRL::ComPtr<IDXGIResource> desktopResource;
+
+	};
+
 	bool _IsControlFocused(Control* tControl);
 	void _CharacterReceived(unsigned int keycode);
 	void _KeyReceived(unsigned int keycode, bool isReleased);

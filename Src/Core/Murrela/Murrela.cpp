@@ -16,9 +16,11 @@ Murrela::Murrela(HWND corewindow, D2D1_SIZE_F size)
 
 Murrela::~Murrela()
 {
+    dxgiOutput.Reset();
+    dxgiSurface.Reset();
+    dxgiAdapter.Reset();
 	d2dFactory.Reset();
 	d2dDevice.Reset();
-    dxgiSurface.Reset();
 }
 
 void Murrela::InitD2D()
@@ -44,6 +46,8 @@ void Murrela::InitD2D()
     d3dDevice.As(&dxgiDevice);
     dxgiDevice->GetAdapter(dxgiAdapter.GetAddressOf());
     dxgiAdapter->GetParent(IID_PPV_ARGS(dxgiFactory.GetAddressOf()));
+    dxgiAdapter->EnumOutputs(0, &dxgiOutput);
+    dxgiOutput.As(&dxgiOutput1);
 
     D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, d2dFactory.GetAddressOf());
     d2dFactory->CreateDevice(dxgiDevice.Get(), d2dDevice.GetAddressOf());
@@ -74,6 +78,76 @@ void Murrela::InitResources()
 
     wrtFactory->GetSystemFontCollection(&fonts);
     wrtFactory->CreateTextFormat(L"Source Code Variable", fonts.Get(), DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 18, L"", &txtFormat);
+}
+
+bool Murrela::SaveTextureAsPNG(ID3D11Device* device,
+    ID3D11DeviceContext* context,
+    ID3D11Texture2D* texture,
+    const wchar_t* filename)
+{
+    if (!device || !context || !texture || !filename) return false;
+
+    // 1. Get texture description
+    D3D11_TEXTURE2D_DESC desc;
+    texture->GetDesc(&desc);
+
+    // 2. Create staging texture (CPU-readable)
+    D3D11_TEXTURE2D_DESC stagingDesc = desc;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.BindFlags = 0;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingDesc.MiscFlags = 0;
+
+    ComPtr<ID3D11Texture2D> staging;
+    if (FAILED(device->CreateTexture2D(&stagingDesc, nullptr, &staging)))
+        return false;
+
+    context->CopyResource(staging.Get(), texture);
+
+    // 3. Map the staging texture
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    if (FAILED(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+        return false;
+
+
+    // 5. Create a WIC bitmap
+    ComPtr<IWICBitmap> wicBitmap;
+    if (FAILED(wicFactory->CreateBitmapFromMemory(
+        desc.Width, desc.Height,
+        GUID_WICPixelFormat32bppBGRA,
+        mapped.RowPitch,
+        mapped.RowPitch * desc.Height,
+        (BYTE*)mapped.pData,
+        &wicBitmap)))
+    {
+        context->Unmap(staging.Get(), 0);
+        return false;
+    }
+
+    context->Unmap(staging.Get(), 0);
+
+    // 6. Create PNG encoder
+    ComPtr<IWICStream> stream;
+    if (FAILED(wicFactory->CreateStream(&stream))) return false;
+    if (FAILED(stream->InitializeFromFilename(filename, GENERIC_WRITE))) return false;
+
+    ComPtr<IWICBitmapEncoder> encoder;
+    if (FAILED(wicFactory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder))) return false;
+    if (FAILED(encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache))) return false;
+
+    ComPtr<IWICBitmapFrameEncode> frame;
+    ComPtr<IPropertyBag2> props;
+    if (FAILED(encoder->CreateNewFrame(&frame, &props))) return false;
+    if (FAILED(frame->Initialize(props.Get()))) return false;
+    if (FAILED(frame->SetSize(desc.Width, desc.Height))) return false;
+
+    WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
+    if (FAILED(frame->SetPixelFormat(&format))) return false;
+    if (FAILED(frame->WriteSource(wicBitmap.Get(), nullptr))) return false;
+    if (FAILED(frame->Commit())) return false;
+    if (FAILED(encoder->Commit())) return false;
+
+    return true;
 }
 
 void Murrela::SetTargetBitmap()
@@ -138,7 +212,6 @@ void Murrela::SetTargetBitmap()
     D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
         pixelFormat, dpi, dpi);
 
-    ComPtr<ID2D1Bitmap1> d2dBitmap;
     d2dContext->SetDpi(dpi, dpi);
     d2dContext->CreateBitmapFromDxgiSurface(dxgiSurface.Get(), &bitmapProperties, &d2dBitmap);
     d2dContext->SetTarget(d2dBitmap.Get());

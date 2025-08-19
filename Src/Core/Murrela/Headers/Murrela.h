@@ -7,6 +7,7 @@
 #include <dwrite.h>
 #include <dcomp.h>
 #include <wincodec.h>
+#include <mutex>
 
 #ifndef _UWP
 #include <vector>
@@ -114,6 +115,7 @@ public:
 	Microsoft::WRL::ComPtr<IDWriteFontCollection> fonts;
 
 	Microsoft::WRL::ComPtr<IWICImagingFactory2> wicFactory;
+	std::mutex swapChainMutex{};
 
 	DWRITE_TEXT_METRICS GetWCharWidth(const wchar_t tWChar, IDWriteTextLayout** idwrtLayout = nullptr)
 	{

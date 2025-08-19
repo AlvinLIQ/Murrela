@@ -148,7 +148,10 @@ void CoreApp::UpdateSize()
 		RECT scSize;
 		GetClientRect(coreWindow, &scSize);
 		D2D1_SIZE_F newSize = D2D1::SizeF((FLOAT)(scSize.right - scSize.left), (FLOAT)(scSize.bottom - scSize.top));
-		murrela->SetSize(newSize);
-		content->UpdateLayout();
+		if (newSize.height * newSize.width != 0.f)
+		{
+			murrela->SetSize(newSize);
+			content->UpdateLayout();
+		}
 	}
 }

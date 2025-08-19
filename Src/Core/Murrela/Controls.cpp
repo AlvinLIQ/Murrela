@@ -42,6 +42,8 @@ void Control::CancelFocus()
 
 void Control::ReDraw()
 {
+	std::scoped_lock lock(murrela->swapChainMutex);
+
 	murrela->d2dContext->BeginDraw();
 	if (this->Parent == nullptr)
 #ifndef _UWP

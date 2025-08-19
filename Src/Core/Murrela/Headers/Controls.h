@@ -314,7 +314,7 @@ namespace Controls
 		void SetColor(D2D1_COLOR_F color)
 		{
 			SafeRelease((IUnknown**)&brush);
-			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 0.0f, 0.0f , 1.0f }, &brush);
+			murrela->d2dContext->CreateSolidColorBrush(color, &brush);
 		}
 		const wchar_t* GetText()
 		{
@@ -324,7 +324,7 @@ namespace Controls
 		Alignments TextAlignment;
 		DWRITE_TEXT_METRICS TextMetrics;
 
-		void Draw()
+		virtual void Draw() override
 		{
 			murrela->d2dContext->DrawTextLayout(D2D1::Point2F(ControlOffset.x + offsets.x, ControlOffset.y + offsets.y), textLayout, brush);
 //			murrela->DrawShadow(GetRectForRender(), { 10.0f, 10.0f });
@@ -361,7 +361,7 @@ namespace Controls
 				offsets.y = (ControlSize.height - TextMetrics.height) / 2;
 		}
 	protected:
-		void Init()
+		virtual void Init() override
 		{
 			murrela->d2dContext->CreateSolidColorBrush({ 0.0f, 0.0f, 0.0f , 1.0f }, &brush);
 		}
@@ -1595,9 +1595,10 @@ namespace Controls
 	class CaptureView : Control
 	{
 	public:
-		CaptureView(Murrela* murla, Alignments alignment, D2D1_SIZE_F blockSize = {}) : Control(murla, alignment, blockSize)
+		CaptureView(Murrela* murla, Alignments alignment, D2D1_SIZE_F blockSize = {}) : Control(murla, alignment, blockSize), tb(L"", murla, alignment, alignment, blockSize)
 		{
 			murla->dxgiOutput1->DuplicateOutput(murla->d3dDevice.Get(), &deskDupl);
+			Init();
 		}
 		~CaptureView()
 		{
@@ -1611,16 +1612,21 @@ namespace Controls
 			{
 				Microsoft::WRL::ComPtr<ID3D11Texture2D> frame;
 				desktopResource.As(&frame);
-				murrela->SaveTextureAsPNG(murrela->d3dDevice.Get(), murrela->d3dContext.Get(), frame.Get(), L"test.png");
+				//murrela->SaveTextureAsPNG(murrela->d3dDevice.Get(), murrela->d3dContext.Get(), frame.Get(), L"test.png");
+				frameCount = frameCount + 1.0f;
+				Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
+				murrela->dxgiSwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
+				murrela->d3dContext->CopyResource(backBuffer.Get(), frame.Get());
+
 				deskDupl->ReleaseFrame();
-				exit(0);
 			}
 		}
 	private:
 		DXGI_OUTDUPL_FRAME_INFO frameInfo;
 		Microsoft::WRL::ComPtr<IDXGIOutputDuplication> deskDupl;
 		Microsoft::WRL::ComPtr<IDXGIResource> desktopResource;
-
+		TextBlock tb;
+		float frameCount = 0.0f;
 	};
 
 	bool _IsControlFocused(Control* tControl);

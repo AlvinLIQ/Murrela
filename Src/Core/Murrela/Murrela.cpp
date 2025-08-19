@@ -220,6 +220,7 @@ void Murrela::SetTargetBitmap()
 
 void Murrela::SetSize(D2D1_SIZE_F newSize)
 {
+    std::scoped_lock lock(swapChainMutex);
     d2dSize = newSize;
     GetRawSize(&newSize);
     if (dxgiSwapChain == nullptr)
@@ -278,7 +279,8 @@ void Murrela::SetSize(D2D1_SIZE_F newSize)
     else
     {
         d2dContext->SetTarget(nullptr);
-        dxgiSurface.ReleaseAndGetAddressOf();
+        d2dBitmap.Reset();
+        dxgiSurface.Reset();
 #ifdef _UWP
         dxgiSwapChain->ResizeBuffers(2, (UINT)newSize.width, (UINT)newSize.height, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_FOREGROUND_LAYER);
 #else

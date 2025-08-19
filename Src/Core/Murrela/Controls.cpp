@@ -45,16 +45,23 @@ void Control::ReDraw()
 	std::scoped_lock lock(murrela->swapChainMutex);
 
 	murrela->d2dContext->BeginDraw();
-	if (this->Parent == nullptr)
-#ifndef _UWP
-		murrela->d2dContext->Clear(D2D1::ColorF(D2D1::ColorF::White));
-#else
-		murrela->d2dContext->Clear(WhiteColor);
-#endif
+	if (is3D)
+	{
+		Draw();
+	}
 	else
-		murrela->d2dContext->FillRectangle(GetRectForRender(), murrela->defaultBackgroundBrush.Get());
-	Draw();
-	murrela->d2dContext->EndDraw();
+	{
+		if (this->Parent == nullptr)
+#ifndef _UWP
+			murrela->d2dContext->Clear(D2D1::ColorF(D2D1::ColorF::White));
+#else
+			murrela->d2dContext->Clear(WhiteColor);
+#endif
+		else
+			murrela->d2dContext->FillRectangle(GetRectForRender(), murrela->defaultBackgroundBrush.Get());
+		Draw();
+		murrela->d2dContext->EndDraw();
+	}
 	murrela->dxgiSwapChain->Present(0, 0);
 }
 

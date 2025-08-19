@@ -263,6 +263,7 @@ namespace Controls
 		ID2D1SolidColorBrush* brushes[4];
 		const UINT colors[4] = { 0x66DFDFDF, 0x66A0A0A0, 0x66444444, 0x66999999 };
 		const int colCount = 4;
+		bool is3D = false;
 		virtual void Init()
 		{
 			for (int i = 0; i < colCount; i++)
@@ -1599,6 +1600,7 @@ namespace Controls
 		{
 			murla->dxgiOutput1->DuplicateOutput(murla->d3dDevice.Get(), &deskDupl);
 			Init();
+			is3D = true;
 		}
 		~CaptureView()
 		{
